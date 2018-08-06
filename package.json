@@ -1,0 +1,42 @@
+{
+  "name": "@jupyterlab/plyto",
+  "version": "0.0.1",
+  "description": "Python Machine Learning Visualization Toolkit",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "license": "BSD-3-Clause",
+  "author": "Jenna Landy, Noah Stapp, and Alena Mueller",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prettier": "prettier --write 'src/**'",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.17.2",
+    "@jupyterlab/mainmenu": "^0.6.2",
+    "@jupyterlab/notebook": "^0.17.2",
+    "@jupyterlab/statusbar": "^0.2.0",
+    "typestyle": "^2.0.1",
+    "vega": "^4.2.0",
+    "vega-embed": "^3.15.0",
+    "vega-lite": "^2.6.0"
+  },
+  "devDependencies": {
+    "prettier": "^1.13.7",
+    "rimraf": "^2.6.1",
+    "typescript": "^3.0"
+  },
+  "jupyterlab": {
+    "extension": true
+  }
+}

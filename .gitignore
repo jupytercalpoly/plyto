@@ -70,7 +70,7 @@ docs/_build/
 target/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+.ipynb_checkpoints/
 
 # pyenv
 .python-version
@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+node_modules/
+lib/
+package-lock.json
