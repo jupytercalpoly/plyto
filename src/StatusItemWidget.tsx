@@ -82,6 +82,24 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         );
       }
     });
+
+    this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
+      let widget: NotebookPanel | null = this.props.tracker.currentWidget;
+      if (widget) {
+        console.log('new widget. re-registering comm targets');
+
+        this.setState(
+          {
+            kernel: widget.session.kernel as Kernel.IKernel
+          },
+          () => {
+            this.state.kernel.iopubMessage.connect(this.onMessage, this);
+
+            this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+          }
+        );
+      }
+    })
   }
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {

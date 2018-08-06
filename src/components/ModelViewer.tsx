@@ -50,7 +50,7 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
           )}
         </div>
         <div className={graphsStyle}>
-          {this.props.spec.map(spec => {
+          {this.props.spec !== [] && this.props.spec.map(spec => {
             return (
               <div
                 key={spec['name']}
