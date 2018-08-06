@@ -29,7 +29,7 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
         <div className={StatsContainerStyle(this.props.done)}>
           {Object.keys(this.props.dataItem).map(stat => {
             return (
-              <Stat
+              <Stat key={stat}
                 statName={stat}
                 stat={this.props.dataItem[stat]}
                 done={this.props.done}

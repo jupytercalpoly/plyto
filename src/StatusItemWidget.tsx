@@ -52,7 +52,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     kernel: this.props.kernel,
     overallComplete: 0,
     epochComplete: 0,
-    epochNumber: 1
+    epochNumber: 1,
   };
 
   constructor(props: any) {
