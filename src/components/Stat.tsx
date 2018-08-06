@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {
-  StatContainerStyle,
-  LabelStyle,
-  StatStyle
-} from '../componentStyle/GraphStyle';
+  statContainerStyle,
+  labelStyle,
+  statStyle
+} from '../componentStyle/graphStyle';
 
 export interface IStatProps {
   statName: string;
@@ -14,14 +14,14 @@ export interface IStatProps {
 export class Stat extends React.Component<IStatProps, {}> {
   render() {
     return (
-      <div className={StatContainerStyle} key={this.props.statName}>
-        <div className={LabelStyle}>
+      <div className={statContainerStyle} key={this.props.statName}>
+        <div className={labelStyle}>
           {this.props.statName
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ')}
         </div>
-        <div className={StatStyle}>
+        <div className={statStyle}>
           <div className="stat">
             {!isNaN(this.props.stat)
               ? this.props.statName === 'accuracy'
