@@ -8,7 +8,7 @@ export const widgetStyle = style({
 export const modelViewerStyle = style({
   display: 'flex',
   flexWrap: 'wrap',
-  fontFamily: 'var(--jp-content-font-family)',
+  fontFamily: 'var(--jp-ui-font-family)',
   fontSize: 'var(--jp-content-font-size1)',
   color: 'var(--jp-content-font-color0)',
 

@@ -24,37 +24,41 @@ export const progessBarContainerStyle = style({
 });
 
 export function progressBarStyle(stat: number) {
-  if (stat < 100) {
+  if (stat < 95) {
     return style({
-      width: '40px',
+      width: '42px',
       backgroundColor: 'var(--jp-content-font-color0)',
-      borderRadius: '3px',
-      height: '6px',
-      marginTop: '4px',
+      borderRadius: '5px',
+      height: '8px',
+      marginTop: '3px',
 
       $nest: {
         '& .progress': {
           width: stat * 0.4,
           backgroundColor: 'var(--jp-brand-color2)',
-          height: '6px',
-          borderRadius: '3px 0px 0px 3px'
+          height: '5px',
+          borderRadius: '3px 0px 0px 3px',
+          marginTop: '1.5px',
+          marginLeft: '1px'
         }
       }
     });
   } else {
     return style({
-      width: '40px',
+      width: '42px',
       backgroundColor: 'var(--jp-content-font-color0)',
-      borderRadius: '3px',
-      height: '6px',
-      marginTop: '4px',
+      borderRadius: '5px',
+      height: '8px',
+      marginTop: '3px',
 
       $nest: {
         '& .progress': {
           width: stat * 0.4,
           backgroundColor: 'var(--jp-brand-color2)',
-          height: '6px',
-          borderRadius: '3px'
+          height: '5px',
+          borderRadius: '3px',
+          marginTop: '1.5px',
+          marginLeft: '1px'
         }
       }
     });
