@@ -99,5 +99,7 @@ class KerasAccuracyLossCallback(Callback):
                 "accuracy": self.accuracy,
             }
         )
-        if self.total_progress % 256 == 0 or self.total_progress == (self.epochs * self.sample_amount):
+        if self.total_progress % 256 == 0 or self.total_progress == (
+            self.epochs * self.sample_amount
+        ):
             self.plyto.send_data()

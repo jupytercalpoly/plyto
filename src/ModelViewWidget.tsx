@@ -79,9 +79,17 @@ class ModelViewPanel extends React.Component<
   }
 
   render() {
-    if (this.state.updateGraph && this.state.dataSet.length !== 0) {
+    let options = {
+      actions: {
+        export: true,
+        source: false,
+        compiled: false,
+        editor: false
+      }
+    };
+    if (this.state.updateGraph) {
       this.state.spec.forEach(spec => {
-        VegaEmbed('#' + spec['name'], spec).then(res => {
+        VegaEmbed('#' + spec['name'], spec, options).then(res => {
           res.view.insert('dataSet', this.state.dataSet).run();
         });
       });
