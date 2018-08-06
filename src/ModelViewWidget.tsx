@@ -104,6 +104,7 @@ class ModelViewPanel extends React.Component<
   }
 
   render() {
+    
     let options = {
       actions: {
         export: true,
@@ -112,6 +113,7 @@ class ModelViewPanel extends React.Component<
         editor: false
       }
     };
+
     if (this.state.updateGraph) {
       this.state.spec.forEach(spec => {
         VegaEmbed('#' + spec['name'], spec, options).then(res => {
@@ -119,6 +121,8 @@ class ModelViewPanel extends React.Component<
         });
       });
     }
+
+    console.log(this.state)
 
     return (
       <ModelViewer

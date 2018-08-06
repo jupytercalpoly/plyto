@@ -50,5 +50,27 @@ export const statStyle = style({
 });
 
 export const graphStyle = style({
-  margin: '25px'
+  margin: '25px',
+
+  $nest: {
+    '& .vega-actions': {
+      paddingLeft: '50px',
+      paddingTop: '10px',
+
+      $nest: {
+        '& a': {
+          color: 'var(--jp-content-font-color0)',
+          textDecoration: 'none',
+          marginRight: '20px',
+          padding: '4px',
+          backgroundColor: 'var(--jp-layout-color2)',
+          border: 'var(--jp-border-width) solid var(--jp-border-color0)',
+          borderRadius: 'var(--jp-border-radius)',
+        },
+        '& a:hover': {
+          backgroundColor: 'var(--jp-layout-color3)'
+        }
+      }
+    }
+  }
 });
