@@ -37,6 +37,7 @@ const extension: JupyterLabPlugin<void> = {
       execute: () => {
         let kernel: Kernel.IKernel = tracker.currentWidget.context.session
           .kernel as Kernel.IKernel;
+        const title: string = tracker.currentWidget.context.path;
 
         const widget = new ModelViewWidget(kernel);
         widget.id = 'machinelearning';
