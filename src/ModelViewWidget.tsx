@@ -28,6 +28,7 @@ interface ModelViewPanelState {
   spec: Object[];
   currentStep: number;
   updateGraph: boolean;
+  displayGraph: boolean;
   done: boolean;
 }
 
@@ -43,6 +44,7 @@ class ModelViewPanel extends React.Component<
     dataItem: {},
     currentStep: 1,
     updateGraph: true,
+    displayGraph: false,
     done: false
   };
 
@@ -54,35 +56,42 @@ class ModelViewPanel extends React.Component<
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     if (msg.content.target_name === 'plyto') {
-      if(msg.content.data['runTime'] === "0:0:0") {
-        this.setState({
-          updateGraph: true,
-          dataSet: []
-        }, () => {
-          this.setState(prevState => ({
-            spec: msg.content.data['spec'],
-            runTime: Number(parseInt(msg.content.data['runTime'].toString())),
-            currentStep: Number(
-              parseInt(msg.content.data['currentStep'].toString())
-            ),
-            done: msg.content.data['totalProgress'] === 100,
-            dataItem: msg.content.data['dataSet']
-          }))
-        })
+      if (msg.content.data['runTime'] <= 0.5) {
+        console.log(msg.content.data);
+        this.setState(
+          {
+            updateGraph: true,
+            displayGraph: false,
+            dataSet: []
+          },
+          () => {
+            this.setState(prevState => ({
+              spec: msg.content.data['spec'],
+              runTime: Number(parseInt(msg.content.data['runTime'].toString())),
+              currentStep: Number(
+                parseInt(msg.content.data['currentStep'].toString())
+              ),
+              done: msg.content.data['totalProgress'] === 100,
+              dataItem: msg.content.data['dataSet']
+            }));
+          }
+        );
       } else {
         this.setState(prevState => ({
-        spec: msg.content.data['spec'],
-        runTime: Number(parseInt(msg.content.data['runTime'].toString())),
-        currentStep: Number(
-          parseInt(msg.content.data['currentStep'].toString())
-        ),
-        updateGraph:
-          prevState.currentStep !== msg.content.data['currentStep'] ||
-          this.state.done,
-        dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
-        done: msg.content.data['totalProgress'] === 100,
-        dataItem: msg.content.data['dataSet']
-      }));}
+          spec: msg.content.data['spec'],
+          runTime: Number(parseInt(msg.content.data['runTime'].toString())),
+          currentStep: Number(
+            parseInt(msg.content.data['currentStep'].toString())
+          ),
+          updateGraph:
+            prevState.currentStep !== msg.content.data['currentStep'] ||
+            this.state.done,
+          displayGraph: true,
+          dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
+          done: msg.content.data['totalProgress'] === 100,
+          dataItem: msg.content.data['dataSet']
+        }));
+      }
     }
   }
 
@@ -121,6 +130,7 @@ class ModelViewPanel extends React.Component<
         dataItem={this.state.dataItem}
         done={this.state.done}
         runTime={this.getFormattedRuntime()}
+        displayGraph={this.state.displayGraph}
       />
     );
   }

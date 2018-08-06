@@ -16,6 +16,7 @@ export interface IModelViewerProps {
   dataItem: { [index: string]: any };
   done: boolean;
   runTime: string;
+  displayGraph: boolean;
 }
 
 export class ModelViewer extends React.Component<IModelViewerProps, {}> {
@@ -50,6 +51,7 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
             </div>
           )}
         </div>
+        {this.props.displayGraph &&
         <div className={graphsStyle}>
           {this.props.spec !== [] 
             ? this.props.spec.map(spec => {
@@ -64,6 +66,7 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
             : null
           }
         </div>
+      }
       </div>
     );
   }
