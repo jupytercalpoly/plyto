@@ -24,13 +24,19 @@ export class Status extends React.Component<IStatusProps, {}> {
   render() {
     return (
       <div className={statusStyle}>
-        <div className={progressContainerStyle}>
-          <ProgressBar statName={'Overall'} stat={this.props.overallComplete} />
-          <ProgressBar
-            statName={'Epoch ' + this.props.epoch}
-            stat={this.props.stepComplete}
-          />
-        </div>
+        {!this.props.done && (
+          <div className={progressContainerStyle}>
+            <ProgressBar
+              statName={'Overall'}
+              stat={this.props.overallComplete}
+            />
+            <ProgressBar
+              statName={'Epoch ' + this.props.epoch}
+              stat={this.props.stepComplete}
+            />
+          </div>
+        )}
+        {this.props.done && <div>Training complete</div>}
         <button
           className={buttonStyle}
           onClick={() =>
