@@ -86,29 +86,46 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     if (msg.content.target_name === 'plyto') {
-      this.setState({
-        overallComplete: Number(
-          parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
-        ),
-        stepComplete: Number(
-          parseFloat(msg.content.data['currentProgress'].toString()).toFixed(2)
-        ),
-        stepNumber: Number(
-          parseInt(msg.content.data['currentStep'].toString())
-        )
-      });
+      this.setState(
+        {
+          overallComplete: Number(
+            parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
+          ),
+          stepComplete: Number(
+            parseFloat(msg.content.data['currentProgress'].toString()).toFixed(
+              2
+            )
+          ),
+          stepNumber: Number(
+            parseInt(msg.content.data['currentStep'].toString())
+          )
+        },
+        () => this.isFinished()
+      );
+    }
+  }
+
+  isFinished() {
+    if (this.state.overallComplete === 100) {
+      setTimeout(() => {
+        this.setState({
+          overallComplete: 0
+        });
+      }, 5000);
     }
   }
 
   render() {
     return (
-      <Status
-        done={this.state.overallComplete === 100}
-        overallComplete={this.state.overallComplete}
-        stepComplete={this.state.stepComplete}
-        epoch={this.state.stepNumber}
-        commands={this.props.commands}
-      />
+      this.state.overallComplete !== 0 && (
+        <Status
+          done={this.state.overallComplete === 100}
+          overallComplete={this.state.overallComplete}
+          stepComplete={this.state.stepComplete}
+          epoch={this.state.stepNumber}
+          commands={this.props.commands}
+        />
+      )
     );
   }
 }
