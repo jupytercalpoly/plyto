@@ -1,16 +1,12 @@
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { 
-  ICommandPalette,
-  Toolbar,
-  ToolbarButton 
-} from '@jupyterlab/apputils';
+import { ICommandPalette, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { IconClass, WidgetStyle } from './componentStyle/ModelViewerStyle'
-import { ModelViewWidget } from './ModelViewWidget'
-import { StatusItemWidget } from './StatusItemWidget'
-import '../style/urls.css'
+import { iconClass, widgetStyle } from './componentStyle/modelViewerStyle';
+import { ModelViewWidget } from './ModelViewWidget';
+import { StatusItemWidget } from './StatusItemWidget';
+import '../style/urls.css';
 
 /**
  * An extension to further explore machine learning models
@@ -25,8 +21,6 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
-    console.log('test7')
-
     function hasKernel(): boolean {
       return (
         tracker.currentWidget !== null &&
@@ -38,7 +32,7 @@ const extension: JupyterLabPlugin<void> = {
     const command: string = 'machinelearning:open-new';
     app.commands.addCommand(command, {
       label: 'Open Machine Learning View',
-      iconClass: IconClass,
+      iconClass: iconClass,
       isEnabled: hasKernel,
       execute: () => {
         let kernel: Kernel.IKernel = tracker.currentWidget.context.session
@@ -47,13 +41,15 @@ const extension: JupyterLabPlugin<void> = {
 
         const widget = new ModelViewWidget(kernel);
         widget.id = 'machinelearning';
-        widget.addClass(WidgetStyle);
-        widget.title.label = title;
-        widget.title.iconClass = IconClass;
+        widget.addClass(widgetStyle);
+        widget.title.label = 'Machine Learning';
+        widget.title.iconClass = iconClass;
         widget.title.closable = true;
 
         if (!widget.isAttached) {
-          tracker.currentWidget.context.addSibling(widget, {mode: 'split-right'})
+          tracker.currentWidget.context.addSibling(widget, {
+            mode: 'split-right'
+          });
         }
         app.shell.activateById(widget.id);
       }
@@ -81,21 +77,20 @@ const extension: JupyterLabPlugin<void> = {
 
     /** Add status bar item **/
     function addStatus() {
-      console.log('adding to status bar')
+      console.log('adding to status bar');
 
       try {
         statusBar.registerStatusItem(
           '@jupyterlab/machinelearning',
           new StatusItemWidget(hasKernel(), null, null, app.commands, tracker),
-          {align: 'middle'}
-        )
-      }
-      catch(error) {
-        console.log('already registered', error)
+          { align: 'middle' }
+        );
+      } catch (error) {
+        console.log('already registered', error);
       }
     }
 
-    /** 
+    /**
      * Deals with updating isEnabled status of command,
      * placing button when currentWidget is a notebook panel,
      * and linking status item to kernel
@@ -108,17 +103,17 @@ const extension: JupyterLabPlugin<void> = {
       widget.context.session.kernelChanged.connect(addStatus);
     }
 
-    tracker.currentChanged.connect((tracker) => {
-      console.log('current changed')
-      addButton()
+    tracker.currentChanged.connect(tracker => {
+      console.log('current changed');
+      addButton();
       if (widget) {
-        console.log('disconnecting')
-        widget.context.session.kernelChanged.disconnect(refreshNewCommand)
-        widget.context.session.kernelChanged.disconnect(addStatus)
+        console.log('disconnecting');
+        widget.context.session.kernelChanged.disconnect(refreshNewCommand);
+        widget.context.session.kernelChanged.disconnect(addStatus);
       }
       widget = tracker.currentWidget;
       if (widget) {
-        console.log('connecting')
+        console.log('connecting');
         widget.context.session.kernelChanged.connect(refreshNewCommand);
         widget.context.session.kernelChanged.connect(addStatus);
       }

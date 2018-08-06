@@ -60,7 +60,9 @@ class ModelViewPanel extends React.Component<
         currentStep: Number(
           parseInt(msg.content.data['currentStep'].toString())
         ),
-        updateGraph: prevState.currentStep !== msg.content.data['currentStep'] || this.state.done,
+        updateGraph:
+          prevState.currentStep !== msg.content.data['currentStep'] ||
+          this.state.done,
         dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
         done: msg.content.data['totalProgress'] === 100,
         dataItem: msg.content.data['dataSet']

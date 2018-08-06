@@ -9,7 +9,7 @@ from time import time
 from .plyto import PlytoAPI
 
 
-class TrainingInfoCallback(Callback):
+class KerasAccuracyLossCallback(Callback):
 
     """
     Create a callback that will track and display training progress, loss, and accuracy

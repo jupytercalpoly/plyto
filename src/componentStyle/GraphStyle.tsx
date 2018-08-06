@@ -1,11 +1,6 @@
 import { style } from 'typestyle';
 
-export const GraphContainerStyle = style({
-  paddingTop: '35px',
-  width: '50%'
-});
-
-export function StatsContainerStyle(done) {
+export function statsContainerStyle(done) {
   if (done) {
     return style({
       width: '100%',
@@ -21,13 +16,13 @@ export function StatsContainerStyle(done) {
   }
 }
 
-export const StatContainerStyle = style({
+export const statContainerStyle = style({
   width: '100%',
   display: 'flex',
   marginBottom: '2px'
 });
 
-export const LabelStyle = style({
+export const labelStyle = style({
   width: '150px',
   boxSizing: 'border-box',
   marginLeft: '75px',
@@ -50,10 +45,10 @@ export const LabelStyle = style({
   }
 });
 
-export const StatStyle = style({
+export const statStyle = style({
   display: 'inherit'
 });
 
-export const GraphStyle = style({
+export const graphStyle = style({
   margin: '25px'
 });

@@ -1,11 +1,11 @@
 import { style } from 'typestyle';
 
-export const WidgetStyle = style({
+export const widgetStyle = style({
   backgroundColor: 'var(--jp-layout-color0)',
   overflowY: 'scroll'
 });
 
-export const ModelViewerStyle = style({
+export const modelViewerStyle = style({
   display: 'flex',
   flexWrap: 'wrap',
   fontFamily: 'var(--jp-content-font-family)',
@@ -25,13 +25,13 @@ export const ModelViewerStyle = style({
   }
 });
 
-export const GraphsStyle = style({
+export const graphsStyle = style({
   display: 'flex',
   flexWrap: 'wrap',
   width: '100%'
 });
 
-export const StatStyle = style({
+export const statStyle = style({
   display: 'inline-flex',
   margin: '5px 5%',
 
@@ -42,14 +42,18 @@ export const StatStyle = style({
   }
 });
 
-export const RunTimeStyle = style({
+export const runTimeStyle = style({
   marginLeft: '75px',
   fontSize: 'var(--jp-content-font-size2)',
   marginTop: '10px'
 });
 
-export const IconClass = style({
+export const iconClass = style({
   backgroundImage: 'var(--jp-icon-machinelearning)',
   backgroundRepeat: 'no-repeat',
   backgroundSize: '14px'
 });
+
+export const emptyPanelStyle = style({
+  textAlign: 'center'
+})
