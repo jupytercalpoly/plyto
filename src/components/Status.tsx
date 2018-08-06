@@ -1,16 +1,16 @@
 import * as React from 'react';
 import { CommandRegistry } from '@phosphor/commands';
 import {
-  ProgressBarStyle,
-  ButtonStyle,
-  ProgessBarContainerStyle,
-  ProgressContainerStyle,
-  StatusStyle
-} from '../componentStyle/StatusStyle';
+  progressBarStyle,
+  buttonStyle,
+  progessBarContainerStyle,
+  progressContainerStyle,
+  statusStyle
+} from '../componentStyle/statusStyle';
 
 export interface IStatusProps {
   overallComplete: number;
-  epochComplete: number;
+  stepComplete: number;
   done: boolean;
   epoch: number;
   commands: CommandRegistry;
@@ -23,16 +23,16 @@ export class Status extends React.Component<IStatusProps, {}> {
 
   render() {
     return (
-      <div className={StatusStyle}>
-        <div className={ProgressContainerStyle}>
+      <div className={statusStyle}>
+        <div className={progressContainerStyle}>
           <ProgressBar statName={'Overall'} stat={this.props.overallComplete} />
           <ProgressBar
             statName={'Epoch ' + this.props.epoch}
-            stat={this.props.epochComplete}
+            stat={this.props.stepComplete}
           />
         </div>
         <button
-          className={ButtonStyle}
+          className={buttonStyle}
           onClick={() =>
             this.props.commands.execute('machinelearning:open-new')
           }
@@ -54,9 +54,9 @@ export class ProgressBar extends React.Component<IProgressBarProps, {}> {
 
   render() {
     return (
-      <div className={ProgessBarContainerStyle}>
+      <div className={progessBarContainerStyle}>
         <div className="label">{this.props.statName}</div>
-        <div className={ProgressBarStyle(this.props.stat)}>
+        <div className={progressBarStyle(this.props.stat)}>
           <div className="progress" />
         </div>
       </div>
