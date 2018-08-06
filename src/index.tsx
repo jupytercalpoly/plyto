@@ -42,7 +42,7 @@ const extension: JupyterLabPlugin<void> = {
         const widget = new ModelViewWidget(kernel);
         widget.id = 'machinelearning';
         widget.addClass(widgetStyle);
-        widget.title.label = 'Machine Learning';
+        widget.title.label = title;
         widget.title.iconClass = iconClass;
         widget.title.closable = true;
 
