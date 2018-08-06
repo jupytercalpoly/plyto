@@ -24,6 +24,7 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
   }
 
   render() {
+    console.log(this.props)
     return (
       <div className={modelViewerStyle}>
         <div className="before" />
@@ -50,15 +51,18 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
           )}
         </div>
         <div className={graphsStyle}>
-          {this.props.spec !== [] && this.props.spec.map(spec => {
-            return (
-              <div
-                key={spec['name']}
-                id={spec['name']}
-                className={graphStyle}
-              />
-            );
-          })}
+          {this.props.spec !== [] 
+            ? this.props.spec.map(spec => {
+              return (
+                <div
+                  key={spec['name']}
+                  id={spec['name']}
+                  className={graphStyle}
+                />
+              );
+            })
+            : null
+          }
         </div>
       </div>
     );

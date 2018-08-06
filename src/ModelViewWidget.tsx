@@ -54,7 +54,23 @@ class ModelViewPanel extends React.Component<
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     if (msg.content.target_name === 'plyto') {
-      this.setState(prevState => ({
+      if(msg.content.data['runTime'] === "0:0:0") {
+        this.setState({
+          updateGraph: true,
+          dataSet: []
+        }, () => {
+          this.setState(prevState => ({
+            spec: msg.content.data['spec'],
+            runTime: Number(parseInt(msg.content.data['runTime'].toString())),
+            currentStep: Number(
+              parseInt(msg.content.data['currentStep'].toString())
+            ),
+            done: msg.content.data['totalProgress'] === 100,
+            dataItem: msg.content.data['dataSet']
+          }))
+        })
+      } else {
+        this.setState(prevState => ({
         spec: msg.content.data['spec'],
         runTime: Number(parseInt(msg.content.data['runTime'].toString())),
         currentStep: Number(
@@ -66,7 +82,7 @@ class ModelViewPanel extends React.Component<
         dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
         done: msg.content.data['totalProgress'] === 100,
         dataItem: msg.content.data['dataSet']
-      }));
+      }));}
     }
   }
 
@@ -79,13 +95,15 @@ class ModelViewPanel extends React.Component<
   }
 
   render() {
-    if (this.state.updateGraph && this.state.dataSet.length !== 0) {
+    if (this.state.updateGraph) {
       this.state.spec.forEach(spec => {
         VegaEmbed('#' + spec['name'], spec).then(res => {
           res.view.insert('dataSet', this.state.dataSet).run();
         });
       });
     }
+
+    console.log(this.state)
 
     return (
       <ModelViewer

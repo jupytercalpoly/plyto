@@ -21,6 +21,8 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
+    console.log('test10')
+
     function hasKernel(): boolean {
       return (
         tracker.currentWidget !== null &&

@@ -17,7 +17,7 @@ class PlytoAPI:
     :param progress: the current progress of iterating through the dataset
     """
 
-    def __init__(self, spec, size={}, steps={}):
+    def __init__(self, spec, size=0, steps=0):
         self.spec = spec
         self.size = size
         self.total_steps = steps
