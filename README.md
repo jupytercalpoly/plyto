@@ -31,7 +31,7 @@ from plyto import check_data, check_column
 Requires node 4+ and npm 4+
 
 ```bash
-git clone
+git clone https://github.com/jupytercalpoly/plyto.git
 cd plyto
 npm install
 npm run build
