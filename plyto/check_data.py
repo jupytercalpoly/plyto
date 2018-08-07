@@ -136,9 +136,12 @@ def check_data(
         if len(abnormalities[col]) > 0:
             abs = ""
             for ab in abnormalities[col]:
-                abs += "\n- " + ab
+                if title:
+                    abs += "\n<div style='margin-left: 25px; list-stye-position: inside; text-indent:-1em'>" + ab + '</div>'
+                else:
+                    abs += "\n<div>" + ab + '</div>'
             if title:
-                display(Markdown(col + ": " + abs))
+                display(Markdown("<div>" + col + ": </div>" + abs))
             else:
                 display(Markdown(abs))
             has_abnormalities = True
