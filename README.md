@@ -35,7 +35,7 @@ git clone https://github.com/jupytercalpoly/plyto.git
 cd plyto
 npm install
 npm run build
-jupyter laextension link .
+jupyter labextension link .
 ```
 
 To rebuild the package and the JupyterLab app
