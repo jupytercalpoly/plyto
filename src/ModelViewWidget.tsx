@@ -57,7 +57,6 @@ class ModelViewPanel extends React.Component<
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     if (msg.content.target_name === 'plyto') {
       if (msg.content.data['runTime'] <= 0.5) {
-        console.log(msg.content.data);
         this.setState(
           {
             updateGraph: true,
@@ -121,8 +120,6 @@ class ModelViewPanel extends React.Component<
         });
       });
     }
-
-    console.log(this.state)
 
     return (
       <ModelViewer
