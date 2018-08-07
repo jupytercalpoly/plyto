@@ -5,7 +5,8 @@ import {
   buttonStyle,
   progessBarContainerStyle,
   progressContainerStyle,
-  statusStyle
+  statusStyle,
+  trainingCompleteStyle
 } from '../componentStyle/statusStyle';
 
 export interface IStatusProps {
@@ -36,7 +37,9 @@ export class Status extends React.Component<IStatusProps, {}> {
             />
           </div>
         )}
-        {this.props.done && <div>Training complete</div>}
+        {this.props.done && (
+          <div className={trainingCompleteStyle}>Training complete</div>
+        )}
         <button
           className={buttonStyle}
           onClick={() =>
