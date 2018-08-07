@@ -1,5 +1,5 @@
 # plyto
-Python Machine Learning Visualization Toolkit
+Python Visualization Toolkit for Machine Learning and Data Exploration
 
 ## Prerequisites for Model Visualization
 
