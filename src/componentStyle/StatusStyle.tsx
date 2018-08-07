@@ -28,7 +28,7 @@ export function progressBarStyle(stat: number) {
     return style({
       width: '42px',
       backgroundColor: 'var(--jp-content-font-color0)',
-      borderRadius: '5px',
+      borderRadius: '4px',
       height: '8px',
       marginTop: '3px',
 
@@ -36,7 +36,7 @@ export function progressBarStyle(stat: number) {
         '& .progress': {
           width: stat * 0.4,
           backgroundColor: 'var(--jp-brand-color2)',
-          height: '5px',
+          height: '6px',
           borderRadius: '3px 0px 0px 3px',
           marginTop: '1.5px',
           marginLeft: '1px'
@@ -47,7 +47,7 @@ export function progressBarStyle(stat: number) {
     return style({
       width: '42px',
       backgroundColor: 'var(--jp-content-font-color0)',
-      borderRadius: '5px',
+      borderRadius: '4px',
       height: '8px',
       marginTop: '3px',
 
@@ -55,7 +55,7 @@ export function progressBarStyle(stat: number) {
         '& .progress': {
           width: stat * 0.4,
           backgroundColor: 'var(--jp-brand-color2)',
-          height: '5px',
+          height: '6px',
           borderRadius: '3px',
           marginTop: '1.5px',
           marginLeft: '1px'
