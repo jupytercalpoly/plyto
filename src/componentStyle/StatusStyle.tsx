@@ -77,3 +77,7 @@ export const buttonStyle = style({
   marginLeft: '13.5px',
   marginTop: '2px'
 });
+
+export const trainingCompleteStyle = style({
+  marginTop: '3px'
+});
