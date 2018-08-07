@@ -38,11 +38,15 @@ def check_data(
     :param outlier_function: a function of the dataset and column name that returns the lower and upper limit for outliers, defaults to 1.5*IQR above the 3rd quartile or below the 1st quartile
     """
 
+    # default to all columns
     if columns == []:
         columns = data.columns
+
+    # abnormalities is a dictionary from column name to a list of abnormality statements
     abnormalities = {}
 
     for col in columns:
+        # initialize dictionary item
         abnormalities[col] = []
 
         """
@@ -72,20 +76,24 @@ def check_data(
         if data[col].dtype == "O":
             num_unique = len(data[col].unique())
             if num_unique > cardinality:
-                ab = "high cardinality with " + str(num_unique) + " unique values"
+                ab = (
+                    "high cardinality with " 
+                    + str(num_unique) 
+                    + " unique values"
+                )
                 abnormalities[col].append(ab)
 
         """
         Check for high frequency of floating point columns
         """
         if data[col].dtype == "float64":
-            num_high_frequency = sum(
+            high_frequency_count = sum(
                 data.groupby(col)[col].count().values > float_frequency
             )
-            if num_high_frequency > 0:
+            if high_frequency_count > 0:
                 ab = (
                     "high frequency of floating point numbers with "
-                    + str(num_high_frequency)
+                    + str(high_frequency_count)
                     + " number(s) having frequency over "
                     + str(float_frequency)
                 )
@@ -114,32 +122,37 @@ def check_data(
         """
         if data[col].dtype == "float64":
             lower_limit, upper_limit = outlier_function(data, col)
-            num_upper_outliers = sum(data[col] > upper_limit)
-            num_lower_outliers = sum(data[col] < lower_limit)
-            if num_upper_outliers > 10 or num_lower_outliers > 10:
+            upper_outlier_count = sum(data[col] > upper_limit)
+            lower_outlier_count = sum(data[col] < lower_limit)
+            if lower_outlier_count > 0 or upper_outlier_count > 0:
                 ab = (
-                    "high number of outliers with "
-                    + str(num_upper_outliers)
+                    "outliers are present with "
+                    + str(upper_outlier_count)
                     + " high outliers and "
-                    + str(num_lower_outliers)
+                    + str(lower_outlier_count)
                     + " low outliers"
                 )
                 abnormalities[col].append(ab)
 
     has_abnormalities = False
-    longest_column = 0
-    for col in columns:
-        if len(col) > longest_column:
-            longest_column = len(col)
 
     for col in abnormalities:
         if len(abnormalities[col]) > 0:
             abs = ""
             for ab in abnormalities[col]:
+                # title is true unless check_data is called by check_column
                 if title:
-                    abs += "\n<div style='margin-left: 25px; list-stye-position: inside; text-indent:-1em'>" + ab + '</div>'
+                    abs += (
+                        "\n<div style= 'margin-left: 30px; text-indent:-1em;'>"
+                        + ab
+                        + "</div>"
+                    )
                 else:
-                    abs += "\n<div>" + ab + '</div>'
+                    abs += (
+                        "\n<div style = 'margin-left: 1em; text-indent:-1em;'>"
+                        + ab 
+                        + "</div>"
+                    )
             if title:
                 display(Markdown("<div>" + col + ": </div>" + abs))
             else:
@@ -161,16 +174,23 @@ def check_column(
     outlier_function=quartile,
 ):
     """
-    Presents a summary of given columns of the given pandas dataframe
+    Presents a summary of given column(s) of the given pandas dataframe
     including summary statistics, bar chart or histogram, and any abnormalities found
     
     :param data: a pandas dataframe
+
     :param columns: a single column name or a list of column names to analyze
+
     :param bins: a boolean value or list of boolean values to determine whether to bin the histogram for each column
+
     :param missing: a cutoff point for high percentage of missing / zero values, defaults to 10%
+
     :param cardinality: a cutoff point for high cardinality of a categorical column, defaults to 15
+
     :param float_frequency: a cutoff point for high frequency of floating point numbers, defaults to 30
+
     :param category_frequency: a cutoff point for low frequency of categories in categorical columns, defaults to 100
+
     :param outlier_function: a function of the dataset and column name that returns the lower and upper limit for outliers,
         defaults to 1.5*IQR above the 3rd quartile or below the 1st quartile
     """
@@ -220,7 +240,11 @@ def check_column(
                     alt.Chart(data)
                     .mark_bar(color="#64b5f6")
                     .encode(
-                        alt.X(col, axis=alt.Axis(title=col.title())), alt.Y("count()")
+                        alt.X(
+                            col, 
+                            axis=alt.Axis(title=col.title())
+                        ), 
+                        alt.Y("count()")
                     )
                 )
         else:
@@ -229,7 +253,9 @@ def check_column(
                 .mark_bar(color="#64b5f6")
                 .encode(
                     alt.X(
-                        col, bin=alt.Bin(maxbins=bin), axis=alt.Axis(title=col.title())
+                        col, 
+                        bin=alt.Bin(maxbins=bin), 
+                        axis=alt.Axis(title=col.title())
                     ),
                     alt.Y("count()"),
                 )

@@ -13,11 +13,17 @@ class KerasAccuracyLossCallback(Callback):
 
     """
     Create a callback that will track and display training progress, loss, and accuracy
+    
     :param sample_amount: number of samples/steps per epoch
+
     :param epochs: number of epochs
+
     :param total_progress: progress of training for all epochs
+
     :param epoch_progress: progress of training in current epoch
+
     :param mode: track if model is using samples (0) or steps (1)
+
     :param total_runtime: the total runtime for training
     """
 

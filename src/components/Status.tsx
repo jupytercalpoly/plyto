@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { CommandRegistry } from '@phosphor/commands';
+import * as React from "react";
+import { CommandRegistry } from "@phosphor/commands";
 import {
   progressBarStyle,
   buttonStyle,
@@ -7,7 +7,7 @@ import {
   progressContainerStyle,
   statusStyle,
   trainingCompleteStyle
-} from '../componentStyle/statusStyle';
+} from "../componentStyle/statusStyle";
 
 export interface IStatusProps {
   overallComplete: number;
@@ -28,11 +28,11 @@ export class Status extends React.Component<IStatusProps, {}> {
         {!this.props.done && (
           <div className={progressContainerStyle}>
             <ProgressBar
-              statName={'Overall'}
+              statName={"Overall"}
               stat={this.props.overallComplete}
             />
             <ProgressBar
-              statName={'Epoch ' + this.props.epoch}
+              statName={"Epoch " + this.props.epoch}
               stat={this.props.stepComplete}
             />
           </div>
@@ -43,7 +43,7 @@ export class Status extends React.Component<IStatusProps, {}> {
         <button
           className={buttonStyle}
           onClick={() =>
-            this.props.commands.execute('machinelearning:open-new')
+            this.props.commands.execute("machinelearning:open-new")
           }
         />
       </div>
