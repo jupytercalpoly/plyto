@@ -94,7 +94,8 @@ class PlytoAPI:
             "totalSteps": self.total_steps,
             "currentStep": self.current_step,
             "currentProgress": (self.current_progress / self.size) * 100,
-            "totalProgress": (self.total_progress / (self.size * self.total_steps)) * 100,
+            "totalProgress": (self.total_progress / (self.size * self.total_steps))
+            * 100,
             "dataSet": self.data_set,
             "runTime": self.runtime,
         }
