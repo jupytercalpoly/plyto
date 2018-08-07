@@ -240,7 +240,7 @@ def check_column(
 
         stats = pd.DataFrame(stats).T
 
-        display(Markdown("###### Column Summary: " + col.title()))
+        display(Markdown("#### Column Summary: " + col.title()))
         display(stats)
         display(chart)
         check_data(
