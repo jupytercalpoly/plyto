@@ -30,7 +30,7 @@ class KerasAccuracyLossCallback(Callback):
         self.current_progress = 0
         self.mode = 0
         self.total_runtime = 0
-        self.starttime = time()
+        self.start_time = time()
         self.epoch_number = 1
         self.plyto = plyto_instance
 
@@ -76,7 +76,10 @@ class KerasAccuracyLossCallback(Callback):
         loss_item = {"samples": self.total_progress, "loss": self.loss}
         self.accuracy = logs.get("acc")
         accuracy_item = {"samples": self.total_progress, "accuracy": self.accuracy}
-        self.total_runtime = time() - self.starttime
+        self.total_runtime = time() - self.start_time
+        self.update_data(loss_item, accuracy_item)
+
+    def update_data(self, loss_item, accuracy_item):
         self.plyto.update_runtime(self.total_runtime)
         self.plyto.update_current_progress(self.current_progress)
         self.plyto.update_total_progress(self.total_progress)
