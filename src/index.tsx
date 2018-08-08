@@ -30,6 +30,8 @@ const extension: JupyterLabPlugin<void> = {
     }
 
     function hasWidget(): boolean {
+      /** Check if nb already has a machine learning widget 
+       *  before opening a new one */
       let check: boolean = false;
       each(app.shell.widgets('main'), widget => {
         if (widget instanceof ModelViewWidget 
@@ -52,8 +54,10 @@ const extension: JupyterLabPlugin<void> = {
         const id: string = 'modelview-'+title;
 
         if (hasWidget()) {
+          /** Activat existing widget */
           app.shell.activateById(id);
         } else {
+          /** Create and activate new widget */
           let kernel: Kernel.IKernel = tracker.currentWidget.context.session
             .kernel as Kernel.IKernel;
         
@@ -104,9 +108,9 @@ const extension: JupyterLabPlugin<void> = {
         );
       } catch (error) { 
         /** We attempt to add the status item whenever the currentWidget changes
-         * it is only actually added if the currentWidget is a notebook
-         * this is not truly an error, simply adds statusbar item if it is not already there
-         * (at the moment there is no way to check if a statusbar item is already registered) */
+         *  it is only actually added if the currentWidget is a notebook
+         *  this is not truly an error, simply adds statusbar item if it is not already there
+         *  (at the moment there is no way to check if a statusbar item is already registered) */
       }
     }
 

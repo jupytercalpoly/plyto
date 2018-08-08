@@ -64,6 +64,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     this.props.kernel.registerCommTarget('plyto', (comm, msg) => {});
 
     this.props.tracker.currentChanged.connect(tracker => {
+      /** When current widget changes reset state, connect messaging, 
+       *  register comm target with the new kernel, and connect statusChanged and 
+       *  kernelChanged functionality to new */
       let widget: NotebookPanel | null = tracker.currentWidget;
       if (widget && widget.session.kernel) {
         this.setState(
@@ -79,6 +82,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
       if (this.props.tracker.currentWidget) {
         this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+          /** Handles kernel interruption, 
+           * status item shows 'Training Interrupted' for one second */
           if (this.props.tracker.currentWidget.session.status === 'idle' 
             && this.state.overallComplete < 100 
             && this.state.overallComplete > 0
@@ -90,6 +95,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         })
 
         this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
+          /** Handles kernel restarts */
           let widget: NotebookPanel | null = this.props.tracker.currentWidget;
           if (widget) {    
             this.setState(
@@ -107,7 +113,21 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     });
 
     if (this.props.tracker.currentWidget) {
+      this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+        /** Handles kernel interruption, 
+        * status item shows 'Training Interrupted' for one second */
+        if (this.props.tracker.currentWidget.session.status === 'idle' 
+          && this.state.overallComplete < 100 
+          && this.state.overallComplete > 0
+        ) {
+          this.setState({
+            overallComplete: -1
+          }, () => this.isFinished())
+        }
+      })
+
       this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
+        /** Handles kernel restarts */
         let widget: NotebookPanel | null = this.props.tracker.currentWidget;
         if (widget) {
           this.setState(
@@ -121,21 +141,11 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           );
         }
       })
-
-      this.props.tracker.currentWidget.session.statusChanged.connect(() => {
-        if (this.props.tracker.currentWidget.session.status === 'idle' 
-          && this.state.overallComplete < 100 
-          && this.state.overallComplete > 0
-        ) {
-          this.setState({
-            overallComplete: -1
-          }, () => this.isFinished())
-        }
-      })
     }
   }
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
+    /** On plyto message update progress */
     if (msg.content.target_name === 'plyto') {
       this.setState(
         {
@@ -157,6 +167,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
   }
 
   isFinished() {
+    /** If training complete or interrupted, display "Training Complete" or 
+     * "Training Interrupted" for 2 seconds */
     if (this.state.overallComplete === 100 || this.state.overallComplete === -1) {
       setTimeout(() => {
         this.setState({
