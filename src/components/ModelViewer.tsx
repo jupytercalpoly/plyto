@@ -1,15 +1,15 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { Stat } from "./Stat";
+import { Stat } from './Stat';
 
 import {
   modelViewerStyle,
   graphsStyle,
   runTimeStyle,
   emptyPanelStyle
-} from "../componentStyle/modelViewerStyle";
+} from '../componentStyle/modelViewerStyle';
 
-import { statsContainerStyle, graphStyle } from "../componentStyle/graphStyle";
+import { statsContainerStyle, graphStyle } from '../componentStyle/graphStyle';
 
 export interface IModelViewerProps {
   spec: Object[];
@@ -46,23 +46,21 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
           })}
           {this.props.done && (
             <div className={runTimeStyle}>
-              {"Total Runtime " + this.props.runTime}
+              {'Total Runtime ' + this.props.runTime}
             </div>
           )}
         </div>
-        {this.props.displayGraph && (
+        {this.props.spec !== [] && (
           <div className={graphsStyle}>
-            {this.props.spec !== []
-              ? this.props.spec.map(spec => {
-                  return (
-                    <div
-                      key={spec["name"]}
-                      id={spec["name"]}
-                      className={graphStyle}
-                    />
-                  );
-                })
-              : null}
+            {this.props.spec.map(spec => {
+              return (
+                <div
+                  key={spec['name']}
+                  id={spec['name']}
+                  className={graphStyle}
+                />
+              );
+            })}
           </div>
         )}
       </div>
