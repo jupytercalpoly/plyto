@@ -67,17 +67,20 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
     this.props.tracker.currentChanged.connect(tracker => {
       let widget: NotebookPanel | null = tracker.currentWidget;
-      if (widget) {
+      if (widget && widget.session.kernel) {
         console.log('new widget. re-registering comm targets');
-
         this.setState(
           {
             kernel: widget.session.kernel as Kernel.IKernel
           },
           () => {
             this.state.kernel.iopubMessage.connect(this.onMessage, this);
-
-            this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+            try {
+              this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+            }
+            catch {
+              console.log('could not register comm', this.state.kernel)
+            }
           }
         );
       }
@@ -86,7 +89,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
       let widget: NotebookPanel | null = this.props.tracker.currentWidget;
       if (widget) {
-        console.log('new widget. re-registering comm targets');
+        console.log('new kernel. re-registering comm targets');
 
         this.setState(
           {
@@ -94,12 +97,24 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           },
           () => {
             this.state.kernel.iopubMessage.connect(this.onMessage, this);
-
             this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
           }
         );
       }
-    });
+    })
+
+    this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+      if (this.props.tracker.currentWidget.session.status === 'idle' 
+        && this.state.overallComplete < 100 
+        && this.state.overallComplete > 0
+      ) {
+        console.log('kernel interrupted')
+
+        this.setState({
+          overallComplete: -1
+        }, () => this.isFinished())
+      }
+    })
   }
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
@@ -130,6 +145,12 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           overallComplete: 0
         });
       }, 5000);
+    } else {
+      setTimeout(() => {
+        this.setState({
+          overallComplete: 0
+        });
+      }, 5000)
     }
   }
 
