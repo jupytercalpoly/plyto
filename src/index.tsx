@@ -86,7 +86,7 @@ const extension: JupyterLabPlugin<void> = {
           { align: 'middle' }
         );
       } catch (error) {
-        console.log('already registered', error);
+        console.log('already registered');
       }
     }
 
