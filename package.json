@@ -26,6 +26,7 @@
     "@jupyterlab/mainmenu": "^0.6.2",
     "@jupyterlab/notebook": "^0.17.2",
     "@jupyterlab/statusbar": "^0.2.0",
+    "@phosphor/algorithm": "^1.1.2",
     "pandas": "0.0.3",
     "typestyle": "^2.0.1",
     "vega": "^4.2.0",

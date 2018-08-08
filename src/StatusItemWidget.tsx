@@ -8,8 +8,6 @@ import { Status } from './components/Status';
 export class StatusItemWidget extends ReactElementWidget {
   constructor(
     hasKernel: boolean,
-    lossGraphSpec: any,
-    accuracyGraphSpec: any,
     commands: CommandRegistry,
     tracker: INotebookTracker
   ) {
@@ -66,31 +64,11 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     this.props.kernel.registerCommTarget('plyto', (comm, msg) => {});
 
     this.props.tracker.currentChanged.connect(tracker => {
+      /** When current widget changes reset state, connect messaging, 
+       *  register comm target with the new kernel, and connect statusChanged and 
+       *  kernelChanged functionality to new */
       let widget: NotebookPanel | null = tracker.currentWidget;
       if (widget && widget.session.kernel) {
-        console.log('new widget. re-registering comm targets');
-        this.setState(
-          {
-            kernel: widget.session.kernel as Kernel.IKernel
-          },
-          () => {
-            this.state.kernel.iopubMessage.connect(this.onMessage, this);
-            try {
-              this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
-            }
-            catch {
-              console.log('could not register comm', this.state.kernel)
-            }
-          }
-        );
-      }
-    });
-
-    this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
-      let widget: NotebookPanel | null = this.props.tracker.currentWidget;
-      if (widget) {
-        console.log('new kernel. re-registering comm targets');
-
         this.setState(
           {
             kernel: widget.session.kernel as Kernel.IKernel
@@ -101,23 +79,73 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           }
         );
       }
-    })
 
-    this.props.tracker.currentWidget.session.statusChanged.connect(() => {
-      if (this.props.tracker.currentWidget.session.status === 'idle' 
-        && this.state.overallComplete < 100 
-        && this.state.overallComplete > 0
-      ) {
-        console.log('kernel interrupted')
+      if (this.props.tracker.currentWidget) {
+        this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+          /** Handles kernel interruption, 
+           * status item shows 'Training Interrupted' for one second */
+          if (this.props.tracker.currentWidget.session.status === 'idle' 
+            && this.state.overallComplete < 100 
+            && this.state.overallComplete > 0
+          ) {    
+            this.setState({
+              overallComplete: -1
+            }, () => this.isFinished())
+          }
+        })
 
-        this.setState({
-          overallComplete: -1
-        }, () => this.isFinished())
+        this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
+          /** Handles kernel restarts */
+          let widget: NotebookPanel | null = this.props.tracker.currentWidget;
+          if (widget) {    
+            this.setState(
+              {
+                kernel: widget.session.kernel as Kernel.IKernel
+              },
+              () => {
+                this.state.kernel.iopubMessage.connect(this.onMessage, this);
+                this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+              }
+            );
+          }
+        })
       }
-    })
+    });
+
+    if (this.props.tracker.currentWidget) {
+      this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+        /** Handles kernel interruption, 
+        * status item shows 'Training Interrupted' for one second */
+        if (this.props.tracker.currentWidget.session.status === 'idle' 
+          && this.state.overallComplete < 100 
+          && this.state.overallComplete > 0
+        ) {
+          this.setState({
+            overallComplete: -1
+          }, () => this.isFinished())
+        }
+      })
+
+      this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
+        /** Handles kernel restarts */
+        let widget: NotebookPanel | null = this.props.tracker.currentWidget;
+        if (widget) {
+          this.setState(
+            {
+              kernel: widget.session.kernel as Kernel.IKernel
+            },
+            () => {
+              this.state.kernel.iopubMessage.connect(this.onMessage, this);
+              this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+            }
+          );
+        }
+      })
+    }
   }
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
+    /** On plyto message update progress */
     if (msg.content.target_name === 'plyto') {
       this.setState(
         {
@@ -139,12 +167,14 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
   }
 
   isFinished() {
+    /** If training complete or interrupted, display "Training Complete" or 
+     * "Training Interrupted" for 2 seconds */
     if (this.state.overallComplete === 100 || this.state.overallComplete === -1) {
       setTimeout(() => {
         this.setState({
           overallComplete: 0
         });
-      }, 5000);
+      }, 2000);
     }
   }
 
