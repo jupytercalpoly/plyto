@@ -42,9 +42,9 @@ class ModelViewPanel extends React.Component<
     dataSet: new Array<Object>(),
     spec: new Array<Object>(),
     dataItem: {},
-    currentStep: 1,
+    currentStep: 0,
     updateGraph: true,
-    displayGraph: false,
+    displayGraph: true,
     done: false
   };
 
