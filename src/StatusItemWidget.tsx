@@ -67,9 +67,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
     this.props.tracker.currentChanged.connect(tracker => {
       let widget: NotebookPanel | null = tracker.currentWidget;
-      if (widget.session.kernel) {
+      if (widget && widget.session.kernel) {
         console.log('new widget. re-registering comm targets');
-        console.log(widget, widget.session.kernel)
         this.setState(
           {
             kernel: widget.session.kernel as Kernel.IKernel

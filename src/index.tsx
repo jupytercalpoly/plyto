@@ -22,8 +22,6 @@ const extension: JupyterLabPlugin<void> = {
     statusBar: IStatusBar
   ): void => {
 
-    console.log('test1')
-
     function hasKernel(): boolean {
       return (
         tracker.currentWidget !== null &&
@@ -88,7 +86,7 @@ const extension: JupyterLabPlugin<void> = {
           { align: 'middle' }
         );
       } catch (error) {
-        console.log('already registered', error);
+        console.log('already registered');
       }
     }
 
