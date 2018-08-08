@@ -22,7 +22,7 @@ const extension: JupyterLabPlugin<void> = {
     statusBar: IStatusBar
   ): void => {
 
-    console.log('11')
+    console.log('12')
 
     function hasKernel(): boolean {
       return (
@@ -86,8 +86,11 @@ const extension: JupyterLabPlugin<void> = {
           new StatusItemWidget(hasKernel(), app.commands, tracker),
           { align: 'middle' }
         );
-      } catch (error) {
-        console.log('already registered');
+      } catch (error) { 
+        /** We attempt to add the status item whenever the currentWidget changes
+         * it is only actually added if the currentWidget is a notebook
+         * this is not truly an error, simply adds statusbar item if it is not already there
+         * (at the moment there is no way to check if a statusbar item is already registered) */
       }
     }
 
@@ -105,16 +108,13 @@ const extension: JupyterLabPlugin<void> = {
     }
 
     tracker.currentChanged.connect(tracker => {
-      console.log('current changed');
       addButton();
       if (widget) {
-        console.log('disconnecting');
         widget.context.session.kernelChanged.disconnect(refreshNewCommand);
         widget.context.session.kernelChanged.disconnect(addStatus);
       }
       widget = tracker.currentWidget;
       if (widget) {
-        console.log('connecting');
         widget.context.session.kernelChanged.connect(refreshNewCommand);
         widget.context.session.kernelChanged.connect(addStatus);
       }
