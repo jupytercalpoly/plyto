@@ -8,8 +8,6 @@ import { Status } from './components/Status';
 export class StatusItemWidget extends ReactElementWidget {
   constructor(
     hasKernel: boolean,
-    lossGraphSpec: any,
-    accuracyGraphSpec: any,
     commands: CommandRegistry,
     tracker: INotebookTracker
   ) {
@@ -119,7 +117,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     console.log(msg)
-    if (msg.content.target_name === 'plyto' && msg.header.msg_type === 'comm_open') {
+    if (msg.content.target_name === 'plyto') {
       this.setState(
         {
           overallComplete: Number(
