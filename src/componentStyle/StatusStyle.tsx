@@ -38,7 +38,7 @@ export function progressBarStyle(stat: number) {
           backgroundColor: "var(--jp-brand-color2)",
           height: "6px",
           borderRadius: "3px 0px 0px 3px",
-          marginTop: "1.5px",
+          marginTop: "1px",
           marginLeft: "1px"
         }
       }
