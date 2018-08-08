@@ -17,6 +17,7 @@ export interface IModelViewerProps {
   done: boolean;
   runTime: string;
   displayGraph: boolean;
+  title: string;
 }
 
 export class ModelViewer extends React.Component<IModelViewerProps, {}> {
@@ -31,7 +32,10 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
         <div className={statsContainerStyle(this.props.done)}>
           {Object.keys(this.props.dataItem).length === 0 && (
             <div className={emptyPanelStyle}>
-              Train a model using Plyto to see statistics and visualizations
+              {"Train a model using Plyto in " 
+                + this.props.title 
+                + " to see statistics and visualizations!"
+              }
             </div>
           )}
           {Object.keys(this.props.dataItem).map(stat => {
