@@ -103,7 +103,6 @@ class ModelViewPanel extends React.Component<
   }
 
   render() {
-    
     let options = {
       actions: {
         export: true,
@@ -113,7 +112,7 @@ class ModelViewPanel extends React.Component<
       }
     };
 
-    if (this.state.updateGraph) {
+    if (this.state.updateGraph && this.state.dataSet.length > 0) {
       this.state.spec.forEach(spec => {
         VegaEmbed('#' + spec['name'], spec, options).then(res => {
           res.view.insert('dataSet', this.state.dataSet).run();
