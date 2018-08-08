@@ -83,24 +83,45 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         );
       }
 
-      this.props.tracker.currentWidget.session.statusChanged.connect(() => {
-        if (this.props.tracker.currentWidget.session.status === 'idle' 
-          && this.state.overallComplete < 100 
-          && this.state.overallComplete > 0
-        ) {
-          console.log('kernel interrupted')
-  
-          this.setState({
-            overallComplete: -1
-          }, () => this.isFinished())
-        }
-      })
+      if (this.props.tracker.currentWidget) {
+        this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+          if (this.props.tracker.currentWidget.session.status === 'idle' 
+            && this.state.overallComplete < 100 
+            && this.state.overallComplete > 0
+          ) {
+            console.log('kernel interrupted')
+    
+            this.setState({
+              overallComplete: -1
+            }, () => this.isFinished())
+          }
+        })
 
+        this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
+          let widget: NotebookPanel | null = this.props.tracker.currentWidget;
+          if (widget) {
+            console.log('new kernel. re-registering comm targets');
+    
+            this.setState(
+              {
+                kernel: widget.session.kernel as Kernel.IKernel
+              },
+              () => {
+                this.state.kernel.iopubMessage.connect(this.onMessage, this);
+                this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+              }
+            );
+          }
+        })
+      }
+    });
+
+    if (this.props.tracker.currentWidget) {
       this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
         let widget: NotebookPanel | null = this.props.tracker.currentWidget;
         if (widget) {
           console.log('new kernel. re-registering comm targets');
-  
+
           this.setState(
             {
               kernel: widget.session.kernel as Kernel.IKernel
@@ -112,37 +133,20 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           );
         }
       })
-    });
 
-    this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
-      let widget: NotebookPanel | null = this.props.tracker.currentWidget;
-      if (widget) {
-        console.log('new kernel. re-registering comm targets');
+      this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+        if (this.props.tracker.currentWidget.session.status === 'idle' 
+          && this.state.overallComplete < 100 
+          && this.state.overallComplete > 0
+        ) {
+          console.log('kernel interrupted')
 
-        this.setState(
-          {
-            kernel: widget.session.kernel as Kernel.IKernel
-          },
-          () => {
-            this.state.kernel.iopubMessage.connect(this.onMessage, this);
-            this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
-          }
-        );
-      }
-    })
-
-    this.props.tracker.currentWidget.session.statusChanged.connect(() => {
-      if (this.props.tracker.currentWidget.session.status === 'idle' 
-        && this.state.overallComplete < 100 
-        && this.state.overallComplete > 0
-      ) {
-        console.log('kernel interrupted')
-
-        this.setState({
-          overallComplete: -1
-        }, () => this.isFinished())
-      }
-    })
+          this.setState({
+            overallComplete: -1
+          }, () => this.isFinished())
+        }
+      })
+    }
   }
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
