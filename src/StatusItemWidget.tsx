@@ -139,18 +139,12 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
   }
 
   isFinished() {
-    if (this.state.overallComplete === 100) {
+    if (this.state.overallComplete === 100 || this.state.overallComplete === -1) {
       setTimeout(() => {
         this.setState({
           overallComplete: 0
         });
       }, 5000);
-    } else {
-      setTimeout(() => {
-        this.setState({
-          overallComplete: 0
-        });
-      }, 5000)
     }
   }
 
