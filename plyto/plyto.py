@@ -1,6 +1,4 @@
 from ipykernel.comm import Comm
-from IPython import get_ipython
-
 
 class PlytoAPI:
     """

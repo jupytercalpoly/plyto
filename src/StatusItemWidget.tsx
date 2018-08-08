@@ -99,7 +99,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           }
         );
       }
-    })
+    });
   }
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {

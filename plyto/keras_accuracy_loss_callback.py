@@ -1,10 +1,4 @@
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D
-from keras.utils import np_utils
-from keras.datasets import mnist
 from keras.callbacks import Callback
-from keras.callbacks import ProgbarLogger
-from ipykernel.comm import Comm
 from time import time
 from .plyto import PlytoAPI
 
