@@ -25,7 +25,7 @@ export class Status extends React.Component<IStatusProps, {}> {
   render() {
     return (
       <div className={statusStyle}>
-        {!this.props.done && this.props.overallComplete !== -1 && (
+        {!this.props.done && (
           <div className={progressContainerStyle}>
             <ProgressBar
               statName={"Overall"}
@@ -40,9 +40,6 @@ export class Status extends React.Component<IStatusProps, {}> {
         {this.props.done && (
           <div className={trainingCompleteStyle}>Training complete</div>
         )}
-        {this.props.overallComplete === -1 &&
-          <div className={trainingCompleteStyle}>Training interrupted</div>
-        }
         <button
           className={buttonStyle}
           onClick={() =>
