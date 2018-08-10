@@ -146,7 +146,17 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     /** On plyto message update progress */
+    console.log(msg)
     if (msg.content.target_name === 'plyto') {
+      if (msg.header.msg_type === 'comm_open') {
+        console.log('trying to fix bug')
+        try {
+          this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+        }
+        catch {
+          console.log('couldnt re-register targets')
+        }
+      }
       this.setState(
         {
           overallComplete: Number(

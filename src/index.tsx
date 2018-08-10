@@ -6,7 +6,6 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { iconClass, widgetStyle } from './componentStyle/modelViewerStyle';
 import { ModelViewWidget } from './ModelViewWidget';
 import { StatusItemWidget } from './StatusItemWidget';
-import { each } from '@phosphor/algorithm'
 import '../style/urls.css';
 
 /**
@@ -22,6 +21,9 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
+
+    console.log('2')
+
     function hasKernel(): boolean {
       return (
         tracker.currentWidget !== null &&
@@ -29,20 +31,6 @@ const extension: JupyterLabPlugin<void> = {
       );
     }
 
-    function hasWidget(): boolean {
-      /** Check if nb already has a machine learning widget 
-       *  before opening a new one */
-      let check: boolean = false;
-      each(app.shell.widgets('main'), widget => {
-        if (widget instanceof ModelViewWidget 
-          && widget.id === 'modelview-'+tracker.currentWidget.context.path
-        ) {
-          check = true;
-        } 
-      })
-      return check
-    }
-    
     /** Add command to command registry */
     const command: string = 'machinelearning:open-new';
     app.commands.addCommand(command, {
@@ -50,31 +38,24 @@ const extension: JupyterLabPlugin<void> = {
       iconClass: iconClass,
       isEnabled: hasKernel,
       execute: () => {
-        const title: string = tracker.currentWidget.context.path;
-        const id: string = 'modelview-'+title;
-
-        if (hasWidget()) {
-          /** Activat existing widget */
-          app.shell.activateById(id);
-        } else {
-          /** Create and activate new widget */
-          let kernel: Kernel.IKernel = tracker.currentWidget.context.session
-            .kernel as Kernel.IKernel;
         
-          const widget = new ModelViewWidget(kernel, title);
-          widget.id = id;
-          widget.addClass(widgetStyle);
-          widget.title.label = title;
-          widget.title.iconClass = iconClass;
-          widget.title.closable = true;
+        let kernel: Kernel.IKernel = tracker.currentWidget.context.session
+          .kernel as Kernel.IKernel;
+        const title: string = tracker.currentWidget.context.path;
 
-          if (!widget.isAttached) {
-            tracker.currentWidget.context.addSibling(widget, {
-              mode: 'split-right'
-            });
-          }
-          app.shell.activateById(widget.id);
+        const widget = new ModelViewWidget(kernel, title);
+        widget.id = 'machinelearning';
+        widget.addClass(widgetStyle);
+        widget.title.label = title;
+        widget.title.iconClass = iconClass;
+        widget.title.closable = true;
+
+        if (!widget.isAttached) {
+          tracker.currentWidget.context.addSibling(widget, {
+            mode: 'split-right'
+          });
         }
+        app.shell.activateById(widget.id);
       }
     });
 
@@ -108,9 +89,9 @@ const extension: JupyterLabPlugin<void> = {
         );
       } catch (error) { 
         /** We attempt to add the status item whenever the currentWidget changes
-         *  it is only actually added if the currentWidget is a notebook
-         *  this is not truly an error, simply adds statusbar item if it is not already there
-         *  (at the moment there is no way to check if a statusbar item is already registered) */
+         * it is only actually added if the currentWidget is a notebook
+         * this is not truly an error, simply adds statusbar item if it is not already there
+         * (at the moment there is no way to check if a statusbar item is already registered) */
       }
     }
 
