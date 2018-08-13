@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ModelViewer } from './components/ModelViewer';
 import { ReactElementWidget } from '@jupyterlab/apputils';
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import { Kernel, /*KernelMessage*/ } from '@jupyterlab/services';
 import VegaEmbed from 'vega-embed';
 
 /** Top Level: ReactElementWidget that passes the kernel down to a React Component */
@@ -52,48 +52,48 @@ class ModelViewPanel extends React.Component<
   constructor(props: any) {
     super(props);
     /** Connect to custom comm with the backend package */
-    this.props.kernel.iopubMessage.connect(this.onMessage, this);
+    //this.props.kernel.iopubMessage.connect(this.onMessage, this);
   }
 
-  onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
-    if (msg.content.target_name === 'plyto') {
-      if (msg.content.data['runTime'] <= 0.5) {
-        this.setState(
-          {
-            updateGraph: true,
-            displayGraph: false,
-            dataSet: []
-          },
-          () => {
-            this.setState(prevState => ({
-              spec: msg.content.data['spec'],
-              runTime: Number(parseInt(msg.content.data['runTime'].toString())),
-              currentStep: Number(
-                parseInt(msg.content.data['currentStep'].toString())
-              ),
-              done: msg.content.data['totalProgress'] === 100,
-              dataItem: msg.content.data['dataSet']
-            }));
-          }
-        );
-      } else {
-        this.setState(prevState => ({
-          spec: msg.content.data['spec'],
-          runTime: Number(parseInt(msg.content.data['runTime'].toString())),
-          currentStep: Number(
-            parseInt(msg.content.data['currentStep'].toString())
-          ),
-          updateGraph:
-            prevState.currentStep !== msg.content.data['currentStep'] ||
-            this.state.done,
-          displayGraph: true,
-          dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
-          done: msg.content.data['totalProgress'] === 100,
-          dataItem: msg.content.data['dataSet']
-        }));
-      }
-    }
-  }
+  // onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
+  //   if (msg.content.target_name === 'plyto') {
+  //     if (msg.content.data['runTime'] <= 0.5) {
+  //       this.setState(
+  //         {
+  //           updateGraph: true,
+  //           displayGraph: false,
+  //           dataSet: []
+  //         },
+  //         () => {
+  //           this.setState(prevState => ({
+  //             spec: msg.content.data['spec'],
+  //             runTime: Number(parseInt(msg.content.data['runTime'].toString())),
+  //             currentStep: Number(
+  //               parseInt(msg.content.data['currentStep'].toString())
+  //             ),
+  //             done: msg.content.data['totalProgress'] === 100,
+  //             dataItem: msg.content.data['dataSet']
+  //           }));
+  //         }
+  //       );
+  //     } else {
+  //       this.setState(prevState => ({
+  //         spec: msg.content.data['spec'],
+  //         runTime: Number(parseInt(msg.content.data['runTime'].toString())),
+  //         currentStep: Number(
+  //           parseInt(msg.content.data['currentStep'].toString())
+  //         ),
+  //         updateGraph:
+  //           prevState.currentStep !== msg.content.data['currentStep'] ||
+  //           this.state.done,
+  //         displayGraph: true,
+  //         dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
+  //         done: msg.content.data['totalProgress'] === 100,
+  //         dataItem: msg.content.data['dataSet']
+  //       }));
+  //     }
+  //   }
+  // }
 
   getFormattedRuntime() {
     let hours = Math.floor(this.state.runTime / 3600);

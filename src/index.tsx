@@ -6,6 +6,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { iconClass, widgetStyle } from './componentStyle/modelViewerStyle';
 import { ModelViewWidget } from './ModelViewWidget';
 import { StatusItemWidget } from './StatusItemWidget';
+import { each } from '@phosphor/algorithm';
 import '../style/urls.css';
 
 /**
@@ -31,6 +32,18 @@ const extension: JupyterLabPlugin<void> = {
       );
     }
 
+    function hasWidget(): boolean {
+      let check: boolean = false;
+      each(app.shell.widgets('main'), widget => {
+        if (widget instanceof ModelViewWidget 
+          && widget.id === 'modelview-'+tracker.currentWidget.context.path
+        ) {
+          check = true;
+        } 
+      })
+      return check
+    }
+
     /** Add command to command registry */
     const command: string = 'machinelearning:open-new';
     app.commands.addCommand(command, {
@@ -39,23 +52,29 @@ const extension: JupyterLabPlugin<void> = {
       isEnabled: hasKernel,
       execute: () => {
         
-        let kernel: Kernel.IKernel = tracker.currentWidget.context.session
-          .kernel as Kernel.IKernel;
         const title: string = tracker.currentWidget.context.path;
+        const id: string = 'modelview-'+title;
 
-        const widget = new ModelViewWidget(kernel, title);
-        widget.id = 'machinelearning';
-        widget.addClass(widgetStyle);
-        widget.title.label = title;
-        widget.title.iconClass = iconClass;
-        widget.title.closable = true;
+        if (hasWidget()) {
+          app.shell.activateById(id);
+        } else {
+          let kernel: Kernel.IKernel = tracker.currentWidget.context.session
+          .kernel as Kernel.IKernel;
+          
+          const widget = new ModelViewWidget(kernel, title);
+          widget.id = id;
+          widget.addClass(widgetStyle);
+          widget.title.label = title;
+          widget.title.iconClass = iconClass;
+          widget.title.closable = true;
 
-        if (!widget.isAttached) {
-          tracker.currentWidget.context.addSibling(widget, {
-            mode: 'split-right'
-          });
+          if (!widget.isAttached) {
+            tracker.currentWidget.context.addSibling(widget, {
+              mode: 'split-right'
+            });
+          }
+          app.shell.activateById(widget.id);
         }
-        app.shell.activateById(widget.id);
       }
     });
 
