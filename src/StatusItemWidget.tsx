@@ -144,20 +144,21 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     }
   }
 
-  onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
+  async onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     /** On plyto message update progress */
     console.log(msg)
     if (msg.content.target_name === 'plyto') {
-      if (msg.header.msg_type === 'comm_open') {
-        console.log('trying to fix bug')
-        try {
-          this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
-        }
-        catch {
-          console.log('couldnt re-register targets')
-        }
-      }
-      this.setState(
+      // if (msg.header.msg_type === 'comm_open') {
+      //   console.log('trying to fix bug')
+      //   try {
+      //     this.state.kernel.iopubMessage.connect(this.onMessage, this);
+      //     this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+      //   }
+      //   catch {
+      //     console.log('couldnt re-register targets')
+      //   }
+      // }
+      await this.setState(
         {
           overallComplete: Number(
             parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
@@ -171,8 +172,16 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
             parseInt(msg.content.data['currentStep'].toString())
           )
         },
-        () => this.isFinished()
+        () => {
+          this.isFinished()
+        }
       );
+    }
+    if (msg.header.msg_type === 'comm_msg') {
+      console.log('test')
+      await this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+      await this.state.kernel.connectToComm('plyto')
+      console.log('done test')
     }
   }
 

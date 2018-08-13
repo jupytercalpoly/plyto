@@ -22,7 +22,7 @@ const extension: JupyterLabPlugin<void> = {
     statusBar: IStatusBar
   ): void => {
 
-    console.log('2')
+    console.log('15')
 
     function hasKernel(): boolean {
       return (

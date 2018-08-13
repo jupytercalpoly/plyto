@@ -1,4 +1,5 @@
-from ipykernel.comm import Comm
+from ipykernel.comm import Comm, CommManager
+from IPython import get_ipython
 
 class PlytoAPI:
     """
@@ -24,6 +25,7 @@ class PlytoAPI:
         self.total_progress = 0
         self.runtime = 0
         self.data_set = {}
+        self.comm_manager = get_ipython().kernel.comm_manager
 
     def update_current_progress(self, new_progress):
         """
@@ -97,5 +99,27 @@ class PlytoAPI:
             "dataSet": self.data_set,
             "runTime": self.runtime,
         }
+        
+        #print(self.comm_manager.targets)
+        print(self.comm_manager.comms)
+
         data_comm = Comm(target_name="plyto", data=data)
         data_comm.send(data=data)
+
+
+        #self.manager.register_target('plyto', self.f)
+        #comm_id = self.manager.register_comm(data_comm)
+
+        # try:
+        #     print('trying new')
+        #     data_comm = Comm(target_name="plyto", data=data)
+        #     data_comm = CommManager.register_comm(comm)
+        #     data_comm.send(data=data)
+        #     print('new')
+        # except:
+        #     data_comm = Comm(target_name="plyto", data=data)
+        #     data_comm.send(data=data)
+        #     print('old')
+
+    def f():
+        pass
