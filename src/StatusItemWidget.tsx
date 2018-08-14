@@ -44,6 +44,7 @@ interface IStatusItemState {
   overallComplete: number;
   stepComplete: number;
   stepNumber: number;
+  commId: string;
 }
 
 /** Second Level: React Component that stores the state for the entire extension */
@@ -52,7 +53,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     kernel: this.props.kernel,
     overallComplete: 0,
     stepComplete: 0,
-    stepNumber: 1
+    stepNumber: 1,
+    commId: '',
   };
 
   constructor(props: any) {
@@ -144,25 +146,32 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     }
   }
 
-  onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
+  async onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
     /** On plyto message update progress */
-    if (msg.content.target_name === 'plyto') {
-      this.setState(
-        {
-          overallComplete: Number(
-            parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
-          ),
-          stepComplete: Number(
-            parseFloat(msg.content.data['currentProgress'].toString()).toFixed(
-              2
-            )
-          ),
-          stepNumber: Number(
-            parseInt(msg.content.data['currentStep'].toString())
+    console.log(msg)
+    if (msg.content.target_name === 'plyto' && msg.header.msg_type === 'comm_open') {
+      await this.setState({
+        commId: msg.content.comm_id.toString()
+      }, () => {console.log('commID is', this.state.commId)})
+    }
+    if (msg.header.msg_type === 'comm_msg' && msg.content.comm_id === this.state.commId) {
+      console.log('correct commID')
+      await this.setState({
+        overallComplete: Number(
+          parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
+        ),
+        stepComplete: Number(
+          parseFloat(msg.content.data['currentProgress'].toString()).toFixed(
+            2
           )
-        },
-        () => this.isFinished()
-      );
+        ),
+        stepNumber: Number(
+          parseInt(msg.content.data['currentStep'].toString())
+        )
+      },
+      () => {
+        this.isFinished()
+      });
     }
   }
 

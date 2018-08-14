@@ -56,7 +56,7 @@ class ModelViewPanel extends React.Component<
   }
 
   onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
-    if (msg.content.target_name === 'plyto') {
+    if (msg.header.msg_type === 'comm_msg') {
       if (msg.content.data['runTime'] <= 0.5) {
         this.setState(
           {

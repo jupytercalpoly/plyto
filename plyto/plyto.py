@@ -1,4 +1,5 @@
-from ipykernel.comm import Comm
+from ipykernel.comm import Comm, CommManager
+from IPython import get_ipython
 
 class PlytoAPI:
     """
@@ -24,6 +25,14 @@ class PlytoAPI:
         self.total_progress = 0
         self.runtime = 0
         self.data_set = {}
+
+        # initiate comm manager, register target, 
+        # initiate comm, and register comm
+        self.comm_manager = get_ipython().kernel.comm_manager
+        self.comm_manager.register_target('plyto', self.f)
+        self.comm = Comm('plyto')
+        self.comm_manager.register_comm(self.comm)
+
 
     def update_current_progress(self, new_progress):
         """
@@ -97,5 +106,13 @@ class PlytoAPI:
             "dataSet": self.data_set,
             "runTime": self.runtime,
         }
-        data_comm = Comm(target_name="plyto", data=data)
-        data_comm.send(data=data)
+
+        self.comm.send(data=data)
+        if data['totalProgress'] == 100:
+            print('closing')
+            self.comm.close()
+
+        # TODO: close comm on an interrupted kernel
+
+    def f():
+        pass
