@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ReactElementWidget } from '@jupyterlab/apputils';
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import { Kernel } from '@jupyterlab/services';
 import { NotebookPanel, INotebookTracker } from '@jupyterlab/notebook';
 import { CommandRegistry } from '@phosphor/commands';
 import { Status } from './components/Status';
@@ -9,7 +9,8 @@ export class StatusItemWidget extends ReactElementWidget {
   constructor(
     hasKernel: boolean,
     commands: CommandRegistry,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    hasPanel: Function
   ) {
     super(
       hasKernel ? (
@@ -19,6 +20,7 @@ export class StatusItemWidget extends ReactElementWidget {
           }
           commands={commands}
           tracker={tracker}
+          hasPanel={hasPanel}
         />
       ) : (
         <div />
@@ -34,6 +36,7 @@ interface IStatusItemProps {
   kernel: Kernel.IKernel;
   commands: CommandRegistry;
   tracker: INotebookTracker;
+  hasPanel: Function;
 }
 
 /**
@@ -45,6 +48,16 @@ interface IStatusItemState {
   stepComplete: number;
   stepNumber: number;
   commId: string;
+  sending: boolean;
+  outgoingComm: Kernel.IComm;
+  runTime: number;
+  dataSet: Object[];
+  dataItem: { [index: string]: number };
+  spec: Object[];
+  currentStep: number;
+  updateGraph: boolean;
+  displayGraph: boolean;
+  done: boolean;
 }
 
 /** Second Level: React Component that stores the state for the entire extension */
@@ -55,12 +68,22 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     stepComplete: 0,
     stepNumber: 1,
     commId: '',
+    sending: this.props.hasPanel(),
+    outgoingComm: null,
+    runTime: 0,
+    dataSet: new Array<Object>(),
+    spec: new Array<Object>(),
+    dataItem: {},
+    currentStep: 0,
+    updateGraph: true,
+    displayGraph: true,
+    done: false
   };
 
   constructor(props: any) {
     super(props);
     /** Connect to custom comm with the backend package */
-    this.props.kernel.iopubMessage.connect(this.onMessage, this);
+    this.props.kernel.anyMessage.connect(this.onMessage, this);
 
     /** Register a custom comm with the backend package */
     this.props.kernel.registerCommTarget('plyto', (comm, msg) => {});
@@ -76,7 +99,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
             kernel: widget.session.kernel as Kernel.IKernel
           },
           () => {
-            this.state.kernel.iopubMessage.connect(this.onMessage, this);
+            this.state.kernel.anyMessage.connect(this.onMessage, this);
             this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
           }
         );
@@ -105,7 +128,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
                 kernel: widget.session.kernel as Kernel.IKernel
               },
               () => {
-                this.state.kernel.iopubMessage.connect(this.onMessage, this);
+                this.state.kernel.anyMessage.connect(this.onMessage, this);
                 this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
               }
             );
@@ -137,7 +160,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               kernel: widget.session.kernel as Kernel.IKernel
             },
             () => {
-              this.state.kernel.iopubMessage.connect(this.onMessage, this);
+              this.state.kernel.anyMessage.connect(this.onMessage, this);
               this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
             }
           );
@@ -146,16 +169,26 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     }
   }
 
-  async onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
-    /** On plyto message update progress */
-    console.log(msg)
-    if (msg.content.target_name === 'plyto' && msg.header.msg_type === 'comm_open') {
+  async onMessage(sender: Kernel.IKernel, msg: any) {
+    msg = msg.msg
+
+    /** On comm_open message save comm_id */
+    if (msg.channel === 'iopub' 
+      && msg.content.target_name === 'plyto' 
+      && msg.header.msg_type === 'comm_open'
+    ) {
       await this.setState({
         commId: msg.content.comm_id.toString()
-      }, () => {console.log('commID is', this.state.commId)})
-    }
-    if (msg.header.msg_type === 'comm_msg' && msg.content.comm_id === this.state.commId) {
-      console.log('correct commID')
+      }, () => {console.log('commID is', this.state.commId)}
+      )
+
+    /** on comm_msg for plyto comm, update state for status item and model viewer */
+    } else if (
+      msg.channel === 'iopub' 
+      && msg.header.msg_type === 'comm_msg' 
+      && msg.content.comm_id === this.state.commId
+    ) {
+      /** update data for status item */
       await this.setState({
         overallComplete: Number(
           parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
@@ -172,6 +205,82 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       () => {
         this.isFinished()
       });
+
+      /** update data for model viewer panel */
+      if (msg.content.data['runTime'] <= 0.5) {
+        this.setState(
+          {
+            updateGraph: true,
+            displayGraph: false,
+            dataSet: []
+          },
+          () => {
+            this.setState(prevState => ({
+              spec: msg.content.data['spec'],
+              runTime: Number(parseInt(msg.content.data['runTime'].toString())),
+              currentStep: Number(
+                parseInt(msg.content.data['currentStep'].toString())
+              ),
+              done: msg.content.data['totalProgress'] === 100,
+              dataItem: msg.content.data['dataSet']
+            }));
+          }
+        );
+        } else {
+          this.setState(prevState => ({
+            spec: msg.content.data['spec'],
+            runTime: Number(parseInt(msg.content.data['runTime'].toString())),
+            currentStep: Number(
+              parseInt(msg.content.data['currentStep'].toString())
+            ),
+            updateGraph:
+              prevState.currentStep !== msg.content.data['currentStep'] ||
+              this.state.done,
+            displayGraph: true,
+            dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
+            done: msg.content.data['totalProgress'] === 100,
+            dataItem: msg.content.data['dataSet']
+          }));
+      }
+
+      /** if panel is open, send data across plyto-data comm */
+      if (this.state.sending) {
+        console.log('sending2')
+        this.state.outgoingComm.send({
+          runTime: this.state.runTime,
+          dataSet: this.state.dataSet,
+          dataItem: this.state.dataItem,
+          spec: this.state.spec,
+          currentStep: this.state.currentStep,
+          updateGraph: this.state.updateGraph,
+          displayGraph: this.state.displayGraph,
+          done: this.state.done
+        })
+      }
+
+    /** when panel is opened, recieve plyto-data message and update sending and outgoingComm */
+    } else if (msg.channel === 'shell' 
+      && msg.content.comm_id === 'plyto-data'
+      && msg.content.data['open']
+    ) {
+      this.setState({
+        sending: true,
+        outgoingComm: this.state.kernel.connectToComm('plyto-data','plyto-data')
+      }, () => {
+        if (this.state.dataSet.length > 0) {
+          console.log('sending1')
+          this.state.outgoingComm.send({
+            runTime: this.state.runTime,
+            dataSet: this.state.dataSet,
+            dataItem: this.state.dataItem,
+            spec: this.state.spec,
+            currentStep: this.state.currentStep,
+            updateGraph: true,
+            displayGraph: true,
+            done: this.state.done
+          })
+        }
+      })
     }
   }
 
