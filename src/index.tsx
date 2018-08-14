@@ -23,8 +23,6 @@ const extension: JupyterLabPlugin<void> = {
     statusBar: IStatusBar
   ): void => {
 
-    console.log('46')
-
     function hasKernel(): boolean {
       return (
         tracker.currentWidget !== null &&

@@ -96,11 +96,17 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       if (widget && widget.session.kernel) {
         this.setState(
           {
-            kernel: widget.session.kernel as Kernel.IKernel
+            kernel: widget.session.kernel as Kernel.IKernel,
           },
           () => {
             this.state.kernel.anyMessage.connect(this.onMessage, this);
             this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+
+            if (this.state.sending) {
+              this.setState({
+                outgoingComm: this.state.kernel.connectToComm('plyto-data','plyto-data')
+              })
+            }
           }
         );
       }
@@ -115,7 +121,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           ) {    
             this.setState({
               overallComplete: -1
-            }, () => this.isFinished())
+            }, () => {
+              this.isFinished()
+            })
           }
         })
 
@@ -130,6 +138,12 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               () => {
                 this.state.kernel.anyMessage.connect(this.onMessage, this);
                 this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+
+                if (this.state.sending) {
+                  this.setState({
+                    outgoingComm: this.state.kernel.connectToComm('plyto-data','plyto-data')
+                  })
+                }
               }
             );
           }
@@ -162,6 +176,12 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
             () => {
               this.state.kernel.anyMessage.connect(this.onMessage, this);
               this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+
+              if (this.state.sending) {
+                this.setState({
+                  outgoingComm: this.state.kernel.connectToComm('plyto-data','plyto-data')
+                })
+              }
             }
           );
         }
@@ -179,8 +199,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     ) {
       await this.setState({
         commId: msg.content.comm_id.toString()
-      }, () => {console.log('commID is', this.state.commId)}
-      )
+      })
 
     /** on comm_msg for plyto comm, update state for status item and model viewer */
     } else if (
@@ -234,8 +253,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               parseInt(msg.content.data['currentStep'].toString())
             ),
             updateGraph:
-              prevState.currentStep !== msg.content.data['currentStep'] ||
-              this.state.done,
+              (prevState.currentStep !== msg.content.data['currentStep'] 
+              && msg.content.data['currentStep'] !== 0)
+              || this.state.done,
             displayGraph: true,
             dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
             done: msg.content.data['totalProgress'] === 100,
@@ -245,7 +265,6 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
       /** if panel is open, send data across plyto-data comm */
       if (this.state.sending) {
-        console.log('sending2')
         this.state.outgoingComm.send({
           runTime: this.state.runTime,
           dataSet: this.state.dataSet,
@@ -268,15 +287,14 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         outgoingComm: this.state.kernel.connectToComm('plyto-data','plyto-data')
       }, () => {
         if (this.state.dataSet.length > 0) {
-          console.log('sending1')
           this.state.outgoingComm.send({
             runTime: this.state.runTime,
             dataSet: this.state.dataSet,
             dataItem: this.state.dataItem,
             spec: this.state.spec,
             currentStep: this.state.currentStep,
-            updateGraph: true,
-            displayGraph: true,
+            updateGraph: false,
+            displayGraph: this.state.displayGraph,
             done: this.state.done
           })
         }

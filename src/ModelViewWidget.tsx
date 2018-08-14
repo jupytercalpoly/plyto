@@ -76,8 +76,6 @@ class ModelViewPanel extends React.Component<
         updateGraph: msg.content.data['updateGraph'],
         displayGraph: msg.content.data['displayGraph'],
         done: msg.content.data['done']
-      }, () => {
-        console.log(this.state)
       })
     }
   }
@@ -101,7 +99,6 @@ class ModelViewPanel extends React.Component<
     };
 
     if (this.state.updateGraph && this.state.dataSet.length > 0) {
-      console.log('updating graph')
       this.state.spec.forEach(spec => {
         VegaEmbed('#' + spec['name'], spec, options).then(res => {
           res.view.insert('dataSet', this.state.dataSet).run();
