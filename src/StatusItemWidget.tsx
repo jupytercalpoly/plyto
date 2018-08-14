@@ -163,14 +163,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       msg.content.target_name === 'plyto' &&
       msg.header.msg_type === 'comm_open'
     ) {
-      await this.setState(
-        {
-          commId: msg.content.comm_id.toString()
-        },
-        () => {
-          console.log('commID is', this.state.commId);
-        }
-      );
+      await this.setState({
+        commId: msg.content.comm_id.toString()
+      });
     }
     if (
       msg.header.msg_type === 'comm_msg' &&

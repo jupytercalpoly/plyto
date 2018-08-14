@@ -108,6 +108,7 @@ class PlytoAPI:
         }
 
         self.comm.send(data=data)
+        
         if data['totalProgress'] == 100:
             self.comm.close()
 

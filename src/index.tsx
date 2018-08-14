@@ -22,9 +22,6 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
-
-    console.log('17')
-
     function hasKernel(): boolean {
       return (
         tracker.currentWidget !== null &&
@@ -35,13 +32,14 @@ const extension: JupyterLabPlugin<void> = {
     function hasWidget(): boolean {
       let check: boolean = false;
       each(app.shell.widgets('main'), widget => {
-        if (widget instanceof ModelViewWidget 
-          && widget.id === 'modelview-'+tracker.currentWidget.context.path
+        if (
+          widget instanceof ModelViewWidget &&
+          widget.id === 'modelview-' + tracker.currentWidget.context.path
         ) {
           check = true;
-        } 
-      })
-      return check
+        }
+      });
+      return check;
     }
 
     /** Add command to command registry */
@@ -51,16 +49,15 @@ const extension: JupyterLabPlugin<void> = {
       iconClass: iconClass,
       isEnabled: hasKernel,
       execute: () => {
-        
         const title: string = tracker.currentWidget.context.path;
-        const id: string = 'modelview-'+title;
+        const id: string = 'modelview-' + title;
 
         if (hasWidget()) {
           app.shell.activateById(id);
         } else {
           let kernel: Kernel.IKernel = tracker.currentWidget.context.session
-          .kernel as Kernel.IKernel;
-          
+            .kernel as Kernel.IKernel;
+
           const widget = new ModelViewWidget(kernel, title);
           widget.id = id;
           widget.addClass(widgetStyle);
@@ -106,7 +103,7 @@ const extension: JupyterLabPlugin<void> = {
           new StatusItemWidget(hasKernel(), app.commands, tracker),
           { align: 'middle' }
         );
-      } catch (error) { 
+      } catch (error) {
         /** We attempt to add the status item whenever the currentWidget changes
          * it is only actually added if the currentWidget is a notebook
          * this is not truly an error, simply adds statusbar item if it is not already there
