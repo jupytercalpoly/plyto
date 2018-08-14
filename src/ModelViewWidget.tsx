@@ -6,8 +6,8 @@ import VegaEmbed from 'vega-embed';
 
 /** Top Level: ReactElementWidget that passes the kernel down to a React Component */
 export class ModelViewWidget extends ReactElementWidget {
-  constructor(kernel: Kernel.IKernel, title:string) {
-    super(<ModelViewPanel kernel={kernel} title={title}/>);
+  constructor(kernel: Kernel.IKernel, title: string) {
+    super(<ModelViewPanel kernel={kernel} title={title} />);
   }
 }
 
@@ -77,6 +77,7 @@ class ModelViewPanel extends React.Component<
         displayGraph: msg.content.data['displayGraph'],
         done: msg.content.data['done']
       })
+
     }
   }
 

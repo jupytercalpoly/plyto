@@ -89,8 +89,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     this.props.kernel.registerCommTarget('plyto', (comm, msg) => {});
 
     this.props.tracker.currentChanged.connect(tracker => {
-      /** When current widget changes reset state, connect messaging, 
-       *  register comm target with the new kernel, and connect statusChanged and 
+      /** When current widget changes reset state, connect messaging,
+       *  register comm target with the new kernel, and connect statusChanged and
        *  kernelChanged functionality to new */
       let widget: NotebookPanel | null = tracker.currentWidget;
       if (widget && widget.session.kernel) {
@@ -113,7 +113,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
       if (this.props.tracker.currentWidget) {
         this.props.tracker.currentWidget.session.statusChanged.connect(() => {
-          /** Handles kernel interruption, 
+          /** Handles kernel interruption,
            * status item shows 'Training Interrupted' for one second */
           if (this.props.tracker.currentWidget.session.status === 'idle' 
             && this.state.overallComplete < 100 
@@ -125,12 +125,12 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               this.isFinished()
             })
           }
-        })
+        });
 
         this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
           /** Handles kernel restarts */
           let widget: NotebookPanel | null = this.props.tracker.currentWidget;
-          if (widget) {    
+          if (widget) {
             this.setState(
               {
                 kernel: widget.session.kernel as Kernel.IKernel
@@ -147,23 +147,27 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               }
             );
           }
-        })
+        });
       }
     });
 
     if (this.props.tracker.currentWidget) {
       this.props.tracker.currentWidget.session.statusChanged.connect(() => {
-        /** Handles kernel interruption, 
-        * status item shows 'Training Interrupted' for one second */
-        if (this.props.tracker.currentWidget.session.status === 'idle' 
-          && this.state.overallComplete < 100 
-          && this.state.overallComplete > 0
+        /** Handles kernel interruption,
+         * status item shows 'Training Interrupted' for one second */
+        if (
+          this.props.tracker.currentWidget.session.status === 'idle' &&
+          this.state.overallComplete < 100 &&
+          this.state.overallComplete > 0
         ) {
-          this.setState({
-            overallComplete: -1
-          }, () => this.isFinished())
+          this.setState(
+            {
+              overallComplete: -1
+            },
+            () => this.isFinished()
+          );
         }
-      })
+      });
 
       this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
         /** Handles kernel restarts */
@@ -185,7 +189,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
             }
           );
         }
-      })
+      });
     }
   }
 
@@ -229,9 +233,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       if (msg.content.data['runTime'] <= 0.5) {
         this.setState(
           {
-            updateGraph: true,
             displayGraph: false,
-            dataSet: []
           },
           () => {
             this.setState(prevState => ({
@@ -299,13 +301,17 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           })
         }
       })
+
     }
   }
 
   isFinished() {
-    /** If training complete or interrupted, display "Training Complete" or 
+    /** If training complete or interrupted, display "Training Complete" or
      * "Training Interrupted" for 2 seconds */
-    if (this.state.overallComplete === 100 || this.state.overallComplete === -1) {
+    if (
+      this.state.overallComplete === 100 ||
+      this.state.overallComplete === -1
+    ) {
       setTimeout(() => {
         this.setState({
           overallComplete: 0
