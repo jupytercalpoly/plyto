@@ -23,8 +23,6 @@ const extension: JupyterLabPlugin<void> = {
     statusBar: IStatusBar
   ): void => {
 
-    console.log('17')
-
     function hasKernel(): boolean {
       return (
         tracker.currentWidget !== null &&
@@ -103,7 +101,7 @@ const extension: JupyterLabPlugin<void> = {
       try {
         statusBar.registerStatusItem(
           '@jupyterlab/machinelearning',
-          new StatusItemWidget(hasKernel(), app.commands, tracker),
+          new StatusItemWidget(hasKernel(), app.commands, tracker, hasWidget),
           { align: 'middle' }
         );
       } catch (error) { 

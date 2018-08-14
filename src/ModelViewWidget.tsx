@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ModelViewer } from './components/ModelViewer';
 import { ReactElementWidget } from '@jupyterlab/apputils';
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import { Kernel, /*KernelMessage*/ } from '@jupyterlab/services';
 import VegaEmbed from 'vega-embed';
 
 /** Top Level: ReactElementWidget that passes the kernel down to a React Component */
@@ -52,44 +52,32 @@ class ModelViewPanel extends React.Component<
   constructor(props: any) {
     super(props);
     /** Connect to custom comm with the backend package */
-    this.props.kernel.iopubMessage.connect(this.onMessage, this);
+    //this.props.kernel.iopubMessage.connect(this.onMessage, this);
+    this.props.kernel.anyMessage.connect(this.onMessage, this);
   }
 
-  onMessage(sender: Kernel.IKernel, msg: KernelMessage.IIOPubMessage) {
-    if (msg.header.msg_type === 'comm_msg') {
-      if (msg.content.data['runTime'] <= 0.5) {
-        this.setState(
-          {
-            displayGraph: false
-          },
-          () => {
-            this.setState(prevState => ({
-              spec: msg.content.data['spec'],
-              runTime: Number(parseInt(msg.content.data['runTime'].toString())),
-              currentStep: Number(
-                parseInt(msg.content.data['currentStep'].toString())
-              ),
-              done: msg.content.data['totalProgress'] === 100,
-              dataItem: msg.content.data['dataSet']
-            }));
-          }
-        );
-      } else {
-        this.setState(prevState => ({
-          spec: msg.content.data['spec'],
-          runTime: Number(parseInt(msg.content.data['runTime'].toString())),
-          currentStep: Number(
-            parseInt(msg.content.data['currentStep'].toString())
-          ),
-          updateGraph:
-            prevState.currentStep !== msg.content.data['currentStep'] ||
-            this.state.done,
-          displayGraph: true,
-          dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
-          done: msg.content.data['totalProgress'] === 100,
-          dataItem: msg.content.data['dataSet']
-        }));
-      }
+  componentDidMount() {
+    let comm: Kernel.IComm = this.props.kernel.connectToComm('plyto-data', 'plyto-data')
+    comm.send({open: true})
+  }
+
+  onMessage(sender: Kernel.IKernel, msg: any) {
+    msg = msg.msg
+    if (msg.channel === 'shell' 
+      && msg.content.comm_id === 'plyto-data'
+      && !msg.content.data['open']
+    ) {
+      this.setState({
+        runTime: msg.content.data['runTime'],
+        dataSet: msg.content.data['dataSet'],
+        spec: msg.content.data['spec'],
+        dataItem: msg.content.data['dataItem'],
+        currentStep: msg.content.data['currentStep'],
+        updateGraph: msg.content.data['updateGraph'],
+        displayGraph: msg.content.data['displayGraph'],
+        done: msg.content.data['done']
+      })
+
     }
   }
 
