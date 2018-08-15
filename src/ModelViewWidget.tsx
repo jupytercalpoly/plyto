@@ -31,6 +31,7 @@ interface ModelViewPanelState {
   updateGraph: boolean;
   displayGraph: boolean;
   done: boolean;
+  didRender: boolean
 }
 
 /** Second Level: React Component that stores the state for the entire extension */
@@ -45,8 +46,9 @@ class ModelViewPanel extends React.Component<
     dataItem: {},
     currentStep: 0,
     updateGraph: true,
-    displayGraph: false,
-    done: false
+    displayGraph: true,
+    done: false,
+    didRender: false
   };
 
   constructor(props: any) {
@@ -56,12 +58,27 @@ class ModelViewPanel extends React.Component<
     this.props.kernel.anyMessage.connect(this.onMessage, this);
   }
 
+  componentWillMount() {
+    this.setState({
+      didRender: false,
+      spec: []
+    })
+  }
+
   componentDidMount() {
-    let comm: Kernel.IComm = this.props.kernel.connectToComm(
-      'plyto-data',
-      'plyto-data'
-    );
-    comm.send({ open: true });
+    let comm: Kernel.IComm = this.props.kernel.connectToComm('plyto-data', 'plyto-data')
+    comm.send({open: true})
+    this.setState({
+      didRender: false
+    })
+  }
+  
+  componentDidUpdate() {
+    if (!this.state.didRender && this.state.spec.length !== 0) {
+      this.setState({
+        didRender: true
+      })
+    }
   }
 
   onMessage(sender: Kernel.IKernel, msg: any) {
@@ -102,7 +119,7 @@ class ModelViewPanel extends React.Component<
       }
     };
 
-    if (this.state.updateGraph && this.state.dataSet.length > 0) {
+    if (this.state.didRender && this.state.updateGraph && this.state.spec.length !== 0) {
       this.state.spec.forEach(spec => {
         VegaEmbed('#' + spec['name'], spec, options).then(res => {
           res.view.insert('dataSet', this.state.dataSet).run();
@@ -119,6 +136,6 @@ class ModelViewPanel extends React.Component<
         displayGraph={this.state.displayGraph}
         title={this.props.title}
       />
-    );
+    ); 
   }
 }

@@ -22,6 +22,8 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
+    console.log('17')
+
     function hasKernel(): boolean {
       return (
         tracker.currentWidget !== null &&
@@ -115,9 +117,7 @@ const extension: JupyterLabPlugin<void> = {
      * Deals with updating isEnabled status of command,
      * placing button when currentWidget is a notebook panel,
      * and linking status item to kernel
-     *
-     * Code credit to @vidartf/jupyterlab-kernelspy
-     * */
+     **/
     let widget: NotebookPanel | null = tracker.currentWidget;
     if (widget) {
       widget.context.session.kernelChanged.connect(refreshNewCommand);

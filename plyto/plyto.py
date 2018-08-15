@@ -33,17 +33,6 @@ class PlytoAPI:
         self.comm = Comm('plyto')
         self.comm_manager.register_comm(self.comm)
 
-        def target_func(comm, msg):
-            print('test1')
-
-            @comm.on_msg
-            def _recv(msg):
-                print('test2')
-
-            comm.send({'test3':'hi3'})
-
-        get_ipython().kernel.comm_manager.register_target('plyto-data', target_func)
-
     def update_current_progress(self, new_progress):
         """
         Update the progress of iterating through the current step and send data to frontend
