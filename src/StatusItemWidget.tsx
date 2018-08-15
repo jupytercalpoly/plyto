@@ -317,6 +317,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           overallComplete: 0
         });
       }, 2000);
+
+      this.state.kernel.connectToComm('plyto',this.state.commId).close()
+      this.state.kernel.connectToComm('plyto-data').close()
     }
   }
 

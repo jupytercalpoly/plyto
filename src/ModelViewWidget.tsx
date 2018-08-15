@@ -58,6 +58,13 @@ class ModelViewPanel extends React.Component<
     this.props.kernel.anyMessage.connect(this.onMessage, this);
   }
 
+  componentWillMount() {
+    this.setState({
+      didRender: false,
+      spec: []
+    })
+  }
+
   componentDidMount() {
     let comm: Kernel.IComm = this.props.kernel.connectToComm('plyto-data', 'plyto-data')
     comm.send({open: true})
@@ -67,7 +74,7 @@ class ModelViewPanel extends React.Component<
   }
   
   componentDidUpdate() {
-    if (!this.state.didRender) {
+    if (!this.state.didRender && this.state.spec.length !== 0) {
       this.setState({
         didRender: true
       })
@@ -112,7 +119,7 @@ class ModelViewPanel extends React.Component<
       }
     };
 
-    if (this.state.didRender && this.state.updateGraph && this.state.dataSet.length > 0) {
+    if (this.state.didRender && this.state.updateGraph && this.state.spec.length !== 0) {
       this.state.spec.forEach(spec => {
         VegaEmbed('#' + spec['name'], spec, options).then(res => {
           res.view.insert('dataSet', this.state.dataSet).run();

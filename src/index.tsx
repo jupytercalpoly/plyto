@@ -22,7 +22,7 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
-    console.log('60')
+    console.log('17')
 
     function hasKernel(): boolean {
       return (
