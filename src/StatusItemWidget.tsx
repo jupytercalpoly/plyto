@@ -295,8 +295,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
             dataItem: this.state.dataItem,
             spec: this.state.spec,
             currentStep: this.state.currentStep,
-            updateGraph: false,
-            displayGraph: this.state.displayGraph,
+            updateGraph: true,
+            displayGraph: true,
             done: this.state.done
           })
         }
