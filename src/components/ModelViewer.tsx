@@ -61,7 +61,6 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
         {this.props.spec !== [] &&
           this.props.displayGraph && (
             <div className={graphsStyle}>
-              rendered
               {this.props.spec.map(spec => {
                 return (
                   <div
