@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { ModelViewer } from './components/ModelViewer';
 import { ReactElementWidget } from '@jupyterlab/apputils';
-import { Kernel, /*KernelMessage*/ } from '@jupyterlab/services';
+import { Kernel } from '@jupyterlab/services';
 import VegaEmbed from 'vega-embed';
 
 /** Top Level: ReactElementWidget that passes the kernel down to a React Component */
@@ -45,7 +45,7 @@ class ModelViewPanel extends React.Component<
     dataItem: {},
     currentStep: 0,
     updateGraph: true,
-    displayGraph: true,
+    displayGraph: false,
     done: false
   };
 
@@ -57,15 +57,19 @@ class ModelViewPanel extends React.Component<
   }
 
   componentDidMount() {
-    let comm: Kernel.IComm = this.props.kernel.connectToComm('plyto-data', 'plyto-data')
-    comm.send({open: true})
+    let comm: Kernel.IComm = this.props.kernel.connectToComm(
+      'plyto-data',
+      'plyto-data'
+    );
+    comm.send({ open: true });
   }
 
   onMessage(sender: Kernel.IKernel, msg: any) {
-    msg = msg.msg
-    if (msg.channel === 'shell' 
-      && msg.content.comm_id === 'plyto-data'
-      && !msg.content.data['open']
+    msg = msg.msg;
+    if (
+      msg.channel === 'shell' &&
+      msg.content.comm_id === 'plyto-data' &&
+      !msg.content.data['open']
     ) {
       this.setState({
         runTime: msg.content.data['runTime'],
@@ -76,8 +80,7 @@ class ModelViewPanel extends React.Component<
         updateGraph: msg.content.data['updateGraph'],
         displayGraph: msg.content.data['displayGraph'],
         done: msg.content.data['done']
-      })
-
+      });
     }
   }
 
