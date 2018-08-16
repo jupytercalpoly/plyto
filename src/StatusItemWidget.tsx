@@ -7,24 +7,19 @@ import { Status } from './components/Status';
 
 export class StatusItemWidget extends ReactElementWidget {
   constructor(
-    hasKernel: boolean,
     commands: CommandRegistry,
     tracker: INotebookTracker,
     hasPanel: Function
   ) {
     super(
-      hasKernel ? (
-        <StatusItem
-          kernel={
-            tracker.currentWidget.context.session.kernel as Kernel.IKernel
-          }
-          commands={commands}
-          tracker={tracker}
-          hasPanel={hasPanel}
-        />
-      ) : (
-        <div />
-      )
+      <StatusItem
+        kernel={
+          tracker.currentWidget.context.session.kernel as Kernel.IKernel
+        }
+        commands={commands}
+        tracker={tracker}
+        hasPanel={hasPanel}
+      />
     );
   }
 }
@@ -49,7 +44,6 @@ interface IStatusItemState {
   stepNumber: number;
   commIds: Object;
   sending: boolean;
-  sendingFrom: string;
   outgoingComm: Kernel.IComm;
   runTime: number;
   dataSet: Object[];
@@ -72,7 +66,6 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     sending: this.props.hasPanel(
       this.props.tracker.currentWidget.context.path
     ),
-    sendingFrom: '',
     outgoingComm: null,
     runTime: 0,
     dataSet: new Array<Object>(),
@@ -93,7 +86,6 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
 
     this.props.tracker.currentChanged.connect(tracker => {
-
       /** Clear panel, stop status */
       this.state.kernel.anyMessage.disconnect(this.onMessage, this)
       this.setState({
@@ -104,7 +96,93 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
        *  register comm target with the new kernel, and connect statusChanged and
        *  kernelChanged functionality to new */
       let widget: NotebookPanel | null = tracker.currentWidget;
-      if (widget && widget.session.kernel) {
+      if (widget && !widget.session.kernel) {
+        tracker.currentWidget.session.statusChanged.connect(session => {
+          if (session.status === 'connected') {
+            let kernel = widget.session.kernel as Kernel.IKernel
+            kernel.anyMessage.connect(this.onMessage, this);
+            kernel.registerCommTarget('plyto', (comm, msg) => {});
+
+            this.setState({
+              kernel: kernel
+            })
+            if (this.props.hasPanel()) {
+              this.setState({
+                sending: true,
+                outgoingComm: kernel.connectToComm(
+                  'plyto-data',
+                  'plyto-data'
+                )
+              })
+            }
+            
+            /* * 
+            * Handles kernel interruption and restarts
+            * status item shows 'Training Interrupted' for one second 
+            * */
+            this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
+              console.log(session.status)
+              /** Interruption */
+              if (
+                this.props.tracker.currentWidget.session.status === 'idle' &&
+                this.state.overallComplete < 100 &&
+                this.state.overallComplete > 0
+              ) {
+                this.setState(
+                  {
+                    overallComplete: -1
+                  },
+                  () => {
+                    this.isFinished();
+                  }
+                );
+              }
+
+              /** Restart */
+              if (this.props.tracker.currentWidget.session.status === 'restarting') {
+                this.setState({
+                  overallComplete:0
+                }) 
+                let widget: NotebookPanel | null = this.props.tracker.currentWidget;
+                if (widget) {
+                  this.setState(
+                    {
+                      kernel: widget.session.kernel as Kernel.IKernel
+                    },
+                    () => {
+                      this.state.kernel.anyMessage.connect(this.onMessage, this);
+                      this.state.kernel.registerCommTarget(
+                        'plyto',
+                        (comm, msg) => {}
+                      );
+      
+                      if (this.state.sending) {
+                        this.setState({
+                          outgoingComm: this.state.kernel.connectToComm(
+                            'plyto-data',
+                            'plyto-data'
+                          )
+                        });
+                      }
+                    }
+                  );
+                  if (this.props.hasPanel()) {
+                    this.setState(
+                      {
+                        sending: true,
+                        outgoingComm: this.state.kernel.connectToComm(
+                          'plyto-data',
+                          'plyto-data'
+                        )
+                      }
+                    )
+                  }
+                }
+              }
+            });
+          }
+        });
+      } else if (widget && widget.session.kernel) {
         let kernel = widget.session.kernel as Kernel.IKernel
         kernel.anyMessage.connect(this.onMessage, this);
         kernel.registerCommTarget('plyto', (comm, msg) => {});
@@ -126,7 +204,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         * Handles kernel interruption and restarts
         * status item shows 'Training Interrupted' for one second 
         * */
-        this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+        this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
+          console.log(session.status)
           /** Interruption */
           if (
             this.props.tracker.currentWidget.session.status === 'idle' &&
@@ -144,7 +223,10 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           }
 
           /** Restart */
-          if (this.props.tracker.currentWidget.session.status === 'connected') {
+          if (this.props.tracker.currentWidget.session.status === 'restarting') {
+            this.setState({
+              overallComplete:0
+            }) 
             let widget: NotebookPanel | null = this.props.tracker.currentWidget;
             if (widget) {
               this.setState(
@@ -207,7 +289,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       * Handles kernel interruption and restarts
       * status item shows 'Training Interrupted' for one second 
       * */
-      this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+      this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
+        console.log(session.status)
         /** Interruption */
         if (
           this.props.tracker.currentWidget.session.status === 'idle' &&
@@ -225,7 +308,10 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         }
 
         /** Restart */
-        if (this.props.tracker.currentWidget.session.status === 'connected') {
+        if (this.props.tracker.currentWidget.session.status === 'restarting') {
+          this.setState({
+            overallComplete:0
+          }) 
           let widget: NotebookPanel | null = this.props.tracker.currentWidget;
           if (widget) {
             this.setState(
