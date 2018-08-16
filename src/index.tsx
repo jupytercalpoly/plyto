@@ -98,7 +98,7 @@ const extension: JupyterLabPlugin<void> = {
       try {
         statusBar.registerStatusItem(
           '@jupyterlab/machinelearning',
-          new StatusItemWidget(hasKernel(), app.commands, tracker, hasWidget),
+          new StatusItemWidget(app.commands, tracker, hasWidget),
           { align: 'middle' }
         );
       } catch (error) {
