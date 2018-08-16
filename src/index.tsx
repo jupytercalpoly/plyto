@@ -22,7 +22,7 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
-    console.log('67')
+    console.log(30)
 
     function hasKernel(): boolean {
       return (
@@ -31,17 +31,16 @@ const extension: JupyterLabPlugin<void> = {
       );
     }
 
-    function hasWidget(path): boolean {
+    function hasWidget(): boolean {
       let check: boolean = false;
       each(app.shell.widgets('main'), widget => {
-        if (
-          widget instanceof ModelViewWidget
-        ) {
+        if (widget instanceof ModelViewWidget) {
           check = true;
         }
       });
       return check;
     }
+
 
     /** Add command to command registry */
     const command: string = 'machinelearning:open-new';
@@ -53,7 +52,7 @@ const extension: JupyterLabPlugin<void> = {
         const title: string = 'Plyto';
         const id: string = 'modelview-' + title;
 
-        if (hasWidget(tracker.currentWidget.context.path)) {
+        if (hasWidget()) {
           app.shell.activateById(id);
         } else {
           let kernel: Kernel.IKernel = tracker.currentWidget.context.session

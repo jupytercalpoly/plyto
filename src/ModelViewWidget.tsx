@@ -58,13 +58,20 @@ class ModelViewPanel extends React.Component<
 
   constructor(props: any) {
     super(props);
-    /** Connect to custom comm with the backend package */
-    this.state.kernel.anyMessage.connect(this.onMessage, this);
+    
+    if (this.props.tracker.currentWidget && this.state.kernel) {
+      /** Connect to custom comm with the backend package */
+      this.state.kernel.anyMessage.connect(this.onMessage, this);
+    }
 
     this.props.tracker.currentChanged.connect(tracker => {
-      this.setState({
-        kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
-      })
+      if (tracker.currentWidget && tracker.currentWidget.session.kernel) {
+        this.setState({
+          kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
+        }, () => {
+          this.state.kernel.anyMessage.connect(this.onMessage, this);
+        })
+      }
     })
   }
 
@@ -100,17 +107,30 @@ class ModelViewPanel extends React.Component<
       && msg.content.comm_id === 'plyto-data'
       && !msg.content.data['open']
     ) {
-      this.setState({
-        runTime: msg.content.data['runTime'],
-        dataSet: msg.content.data['dataSet'],
-        spec: msg.content.data['spec'],
-        dataItem: msg.content.data['dataItem'],
-        currentStep: msg.content.data['currentStep'],
-        updateGraph: msg.content.data['updateGraph'],
-        displayGraph: msg.content.data['displayGraph'],
-        done: msg.content.data['done'],
-        title: msg.content.data['title']
-      })
+      if (msg.content.data['title'] !== 'none'){
+        this.setState({
+          runTime: msg.content.data['runTime'],
+          dataSet: msg.content.data['dataSet'],
+          spec: msg.content.data['spec'],
+          dataItem: msg.content.data['dataItem'],
+          currentStep: msg.content.data['currentStep'],
+          updateGraph: msg.content.data['updateGraph'],
+          displayGraph: msg.content.data['displayGraph'],
+          done: msg.content.data['done'],
+          title: msg.content.data['title']
+        })
+      } else {
+        this.setState({
+          runTime: msg.content.data['runTime'],
+          dataSet: msg.content.data['dataSet'],
+          spec: msg.content.data['spec'],
+          dataItem: msg.content.data['dataItem'],
+          currentStep: msg.content.data['currentStep'],
+          updateGraph: msg.content.data['updateGraph'],
+          displayGraph: msg.content.data['displayGraph'],
+          done: msg.content.data['done']
+        })
+      }
     }
   }
 

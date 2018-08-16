@@ -47,8 +47,9 @@ interface IStatusItemState {
   overallComplete: number;
   stepComplete: number;
   stepNumber: number;
-  commId: string;
+  commIds: Object;
   sending: boolean;
+  sendingFrom: string;
   outgoingComm: Kernel.IComm;
   runTime: number;
   dataSet: Object[];
@@ -67,10 +68,11 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     overallComplete: 0,
     stepComplete: 0,
     stepNumber: 1,
-    commId: '',
+    commIds: {},
     sending: this.props.hasPanel(
       this.props.tracker.currentWidget.context.path
     ),
+    sendingFrom: '',
     outgoingComm: null,
     runTime: 0,
     dataSet: new Array<Object>(),
@@ -85,13 +87,19 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
   constructor(props: any) {
     super(props);
     /** Connect to custom comm with the backend package */
-    this.props.kernel.anyMessage.connect(this.onMessage, this);
+    this.state.kernel.anyMessage.connect(this.onMessage, this);
 
     /** Register a custom comm with the backend package */
-    this.props.kernel.registerCommTarget('plyto', (comm, msg) => {});
+    this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
 
     this.props.tracker.currentChanged.connect(tracker => {
-      
+
+      /** Clear panel, stop status */
+      this.state.kernel.anyMessage.disconnect(this.onMessage, this)
+      this.setState({
+        overallComplete: 0
+      })
+
       /** When current widget changes reset state, connect messaging,
        *  register comm target with the new kernel, and connect statusChanged and
        *  kernelChanged functionality to new */
@@ -101,12 +109,13 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         kernel.anyMessage.connect(this.onMessage, this);
         kernel.registerCommTarget('plyto', (comm, msg) => {});
 
-        if (this.props.hasPanel(
-          this.props.tracker.currentWidget.context.path
-        )) {
+        this.setState({
+          kernel: kernel
+        })
+        if (this.props.hasPanel()) {
           this.setState({
             sending: true,
-            outgoingComm: this.state.kernel.connectToComm(
+            outgoingComm: kernel.connectToComm(
               'plyto-data',
               'plyto-data'
             )
@@ -159,7 +168,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
                   }
                 }
               );
-              if (this.props.hasPanel(this.props.tracker.currentWidget.context.path)) {
+              if (this.props.hasPanel()) {
                 this.setState(
                   {
                     sending: true,
@@ -182,7 +191,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       kernel.anyMessage.connect(this.onMessage, this);
       kernel.registerCommTarget('plyto', (comm, msg) => {});
 
-      if (this.props.hasPanel(this.props.tracker.currentWidget.context.path)) {
+      if (this.props.hasPanel()) {
         this.setState(
           {
             sending: true,
@@ -240,7 +249,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
                 }
               }
             );
-            if (this.props.hasPanel(this.props.tracker.currentWidget.context.path)) {
+            if (this.props.hasPanel()) {
               this.setState(
                 {
                   sending: true,
@@ -266,21 +275,23 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       msg.content.target_name === 'plyto' &&
       msg.header.msg_type === 'comm_open'
     ) {
+      let newCommIds = this.state.commIds
+      newCommIds[this.props.tracker.currentWidget.context.path] = msg.content.comm_id.toString()
       await this.setState({
-        commId: msg.content.comm_id.toString(),
-        sending: this.props.hasPanel(this.props.tracker.currentWidget.context.path)
+        commIds: newCommIds,
+        sending: this.props.hasPanel()
       });
 
       /** on comm_msg for plyto comm, update state for status item and model viewer */
     } else if (
       msg.channel === 'iopub' &&
       msg.header.msg_type === 'comm_msg' &&
-      msg.content.comm_id === this.state.commId
+      msg.content.comm_id === this.state.commIds[this.props.tracker.currentWidget.context.path]
     ) {
       /** update data for status item */
       await this.setState(
         {
-          sending: this.props.hasPanel(this.props.tracker.currentWidget.context.path),
+          sending: this.props.hasPanel(),
           overallComplete: Number(
             parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
           ),
@@ -345,7 +356,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           updateGraph: this.state.updateGraph,
           displayGraph: true,
           done: this.state.done,
-          title: this.props.tracker.currentWidget.context.path
+          title: this.state.sending ? this.props.tracker.currentWidget.context.path : 'none'
         });
       }
 
@@ -374,7 +385,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               updateGraph: false,
               displayGraph: false,
               done: this.state.done,
-              title: this.props.tracker.currentWidget.context.path
+              title: this.state.sending ? this.props.tracker.currentWidget.context.path : 'none'
             });
           }
         }

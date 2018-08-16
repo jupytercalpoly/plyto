@@ -109,11 +109,6 @@ class PlytoAPI:
         }
 
         self.comm.send(data=data)
-        
-        # if data['totalProgress'] == 100:
-        #     self.comm.close()
-
-        # TODO: close comm on an interrupted kernel
 
     def f():
         pass
