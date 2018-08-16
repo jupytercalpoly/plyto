@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/plyto",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Python Machine Learning Visualization Toolkit",
   "keywords": [
     "jupyter",
@@ -22,10 +22,11 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^0.17.2",
+    "@jupyterlab/application": "^0.18.0",
+    "@jupyterlab/apputils": "^0.18.0",
     "@jupyterlab/mainmenu": "^0.6.2",
     "@jupyterlab/notebook": "^0.17.2",
-    "@jupyterlab/statusbar": "^0.2.0",
+    "@jupyterlab/statusbar": "^0.3.0",
     "@phosphor/algorithm": "^1.1.2",
     "pandas": "0.0.3",
     "typestyle": "^2.0.1",

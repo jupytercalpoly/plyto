@@ -42,12 +42,17 @@ interface IStatusItemState {
   overallComplete: number;
   stepComplete: number;
   stepNumber: number;
-  commIds: Object;
+  commIds: { [index: number]: any }[];
   sending: boolean;
+<<<<<<< Updated upstream
   outgoingComm: Kernel.IComm;
+=======
+  sendingFrom: string;
+  outgoingComm: any;
+>>>>>>> Stashed changes
   runTime: number;
   dataSet: Object[];
-  dataItem: { [index: string]: number };
+  dataItem: { [index: string]: any };
   spec: Object[];
   currentStep: number;
   updateGraph: boolean;
@@ -57,6 +62,7 @@ interface IStatusItemState {
 
 /** Second Level: React Component that stores the state for the entire extension */
 class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
+<<<<<<< Updated upstream
   state = {
     kernel: this.props.kernel,
     overallComplete: 0,
@@ -77,8 +83,30 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     done: false
   };
 
+=======
+>>>>>>> Stashed changes
   constructor(props: any) {
     super(props);
+    this.state = {
+      kernel: this.props.kernel,
+      overallComplete: 0,
+      stepComplete: 0,
+      stepNumber: 1,
+      commIds: new Array<{ [index: number]: any }>(),
+      sending: this.props.hasPanel(
+        this.props.tracker.currentWidget.context.path
+      ),
+      sendingFrom: '',
+      outgoingComm: null,
+      runTime: 0,
+      dataSet: new Array<{ [index: string]: any }>(),
+      spec: new Array<{ [index: string]: any }>(),
+      dataItem: {},
+      currentStep: 0,
+      updateGraph: true,
+      displayGraph: true,
+      done: false
+    };
     /** Connect to custom comm with the backend package */
     this.state.kernel.anyMessage.connect(this.onMessage, this);
 
@@ -87,10 +115,10 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
     this.props.tracker.currentChanged.connect(tracker => {
       /** Clear panel, stop status */
-      this.state.kernel.anyMessage.disconnect(this.onMessage, this)
+      this.state.kernel.anyMessage.disconnect(this.onMessage, this);
       this.setState({
         overallComplete: 0
-      })
+      });
 
       /** When current widget changes reset state, connect messaging,
        *  register comm target with the new kernel, and connect statusChanged and
@@ -188,17 +216,14 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
         this.setState({
           kernel: kernel
-        })
+        });
         if (this.props.hasPanel()) {
           this.setState({
             sending: true,
-            outgoingComm: kernel.connectToComm(
-              'plyto-data',
-              'plyto-data'
-            )
-          })
+            outgoingComm: kernel.connectToComm('plyto-data', 'plyto-data')
+          });
         }
-        
+
         /* * 
         * Handles kernel interruption and restarts
         * status item shows 'Training Interrupted' for one second 
@@ -237,7 +262,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
                     'plyto',
                     (comm, msg) => {}
                   );
-  
+
                   if (this.state.sending) {
                     this.setState({
                       outgoingComm: this.state.kernel.connectToComm(
@@ -249,15 +274,13 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
                 }
               );
               if (this.props.hasPanel()) {
-                this.setState(
-                  {
-                    sending: true,
-                    outgoingComm: this.state.kernel.connectToComm(
-                      'plyto-data',
-                      'plyto-data'
-                    )
-                  }
-                )
+                this.setState({
+                  sending: true,
+                  outgoingComm: this.state.kernel.connectToComm(
+                    'plyto-data',
+                    'plyto-data'
+                  )
+                });
               }
             }
           }
@@ -267,22 +290,20 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
     let widget: NotebookPanel | null = this.props.tracker.currentWidget;
     if (widget && widget.session.kernel) {
-      let kernel = widget.session.kernel as Kernel.IKernel
+      let kernel = widget.session.kernel as Kernel.IKernel;
       kernel.anyMessage.connect(this.onMessage, this);
       kernel.registerCommTarget('plyto', (comm, msg) => {});
 
       if (this.props.hasPanel()) {
-        this.setState(
-          {
-            sending: true,
-            outgoingComm: this.state.kernel.connectToComm(
-              'plyto-data',
-              'plyto-data'
-            )
-          }
-        )
+        this.setState({
+          sending: true,
+          outgoingComm: this.state.kernel.connectToComm(
+            'plyto-data',
+            'plyto-data'
+          )
+        });
       }
-      
+
       /* * 
       * Handles kernel interruption and restarts
       * status item shows 'Training Interrupted' for one second 
@@ -333,20 +354,17 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               }
             );
             if (this.props.hasPanel()) {
-              this.setState(
-                {
-                  sending: true,
-                  outgoingComm: this.state.kernel.connectToComm(
-                    'plyto-data',
-                    'plyto-data'
-                  )
-                }
-              )
+              this.setState({
+                sending: true,
+                outgoingComm: this.state.kernel.connectToComm(
+                  'plyto-data',
+                  'plyto-data'
+                )
+              });
             }
           }
         }
-
-      })
+      });
     }
   }
 
@@ -358,8 +376,10 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       msg.content.target_name === 'plyto' &&
       msg.header.msg_type === 'comm_open'
     ) {
-      let newCommIds = this.state.commIds
-      newCommIds[this.props.tracker.currentWidget.context.path] = msg.content.comm_id.toString()
+      let newCommIds = this.state.commIds;
+      newCommIds[
+        Number(this.props.tracker.currentWidget.context.path)
+      ] = msg.content.comm_id.toString();
       await this.setState({
         commIds: newCommIds,
         sending: this.props.hasPanel()
@@ -369,7 +389,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     } else if (
       msg.channel === 'iopub' &&
       msg.header.msg_type === 'comm_msg' &&
-      msg.content.comm_id === this.state.commIds[this.props.tracker.currentWidget.context.path]
+      msg.content.comm_id ===
+        this.state.commIds[Number(this.props.tracker.currentWidget.context.path)]
     ) {
       /** update data for status item */
       await this.setState(
@@ -439,7 +460,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           updateGraph: this.state.updateGraph,
           displayGraph: true,
           done: this.state.done,
-          title: this.state.sending ? this.props.tracker.currentWidget.context.path : 'none'
+          title: this.state.sending
+            ? this.props.tracker.currentWidget.context.path
+            : 'none'
         });
       }
 
@@ -468,7 +491,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               updateGraph: false,
               displayGraph: false,
               done: this.state.done,
-              title: this.state.sending ? this.props.tracker.currentWidget.context.path : 'none'
+              title: this.state.sending
+                ? this.props.tracker.currentWidget.context.path
+                : 'none'
             });
           }
         }
@@ -489,11 +514,10 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         });
       }, 2000);
 
-      this.state.kernel.connectToComm('plyto').close()
-      this.state.kernel.connectToComm('plyto').dispose()
-      this.state.kernel.connectToComm('plyto-data').close()
-      this.state.kernel.connectToComm('plyto-data').dispose()
-
+      this.state.kernel.connectToComm('plyto').close();
+      this.state.kernel.connectToComm('plyto').dispose();
+      this.state.kernel.connectToComm('plyto-data').close();
+      this.state.kernel.connectToComm('plyto-data').dispose();
     }
   }
 

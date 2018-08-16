@@ -1,6 +1,6 @@
 import { style } from 'typestyle';
 
-export function statsContainerStyle(done) {
+export function statsContainerStyle(done: boolean) {
   if (done) {
     return style({
       width: '100%',
