@@ -6,7 +6,8 @@ import {
   modelViewerStyle,
   graphsStyle,
   runTimeStyle,
-  emptyPanelStyle
+  emptyPanelStyle,
+  textStyle
 } from '../componentStyle/modelViewerStyle';
 
 import { statsContainerStyle, graphStyle } from '../componentStyle/graphStyle';
@@ -29,6 +30,9 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
     return (
       <div className={modelViewerStyle}>
         <div className="before" />
+        <div className={textStyle} id='title'>
+          {this.props.title}
+        </div>
         <div className={statsContainerStyle(this.props.done)}>
           {Object.keys(this.props.dataItem).length === 0 && (
             <div className={emptyPanelStyle}>
@@ -53,11 +57,11 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
             </div>
           )}
         </div>
-        {!this.props.displayGraph && (
-          <div className={emptyPanelStyle}>
-            {'Graphs will appear after the current epoch is complete'}
+        {!this.props.done &&
+          <div className={textStyle} id='message'>
+            {'Graphs will update at the end of each epoch'}
           </div>
-        )}
+        }
         {this.props.spec !== [] &&
           this.props.displayGraph && (
             <div className={graphsStyle}>

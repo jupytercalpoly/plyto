@@ -25,6 +25,24 @@ export const modelViewerStyle = style({
   }
 });
 
+export const textStyle = style({
+  marginLeft: '75px',
+
+  $nest: {
+    '&#title': {
+      marginTop: '15px',
+      fontSize: 'var(--jp-content-font-size2)',
+      fontWeight: 'bold',
+      color: 'var(--jp-content-font-color2)'
+    },
+
+    '&#message': {
+      marginTop: '25px'
+    }
+  }
+  
+})
+
 export const graphsStyle = style({
   display: 'flex',
   flexWrap: 'wrap',
