@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/plyto",
+  "name": "jupyterlab-plyto",
   "version": "0.1.0",
   "description": "Python Machine Learning Visualization Toolkit",
   "keywords": [
