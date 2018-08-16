@@ -121,7 +121,6 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
             * status item shows 'Training Interrupted' for one second 
             * */
             this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
-              console.log(session.status)
               /** Interruption */
               if (
                 this.props.tracker.currentWidget.session.status === 'idle' &&
@@ -205,7 +204,6 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         * status item shows 'Training Interrupted' for one second 
         * */
         this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
-          console.log(session.status)
           /** Interruption */
           if (
             this.props.tracker.currentWidget.session.status === 'idle' &&
@@ -290,7 +288,6 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       * status item shows 'Training Interrupted' for one second 
       * */
       this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
-        console.log(session.status)
         /** Interruption */
         if (
           this.props.tracker.currentWidget.session.status === 'idle' &&
