@@ -22,7 +22,7 @@ const extension: JupyterLabPlugin<void> = {
     tracker: INotebookTracker,
     statusBar: IStatusBar
   ): void => {
-    console.log('17')
+    console.log('67')
 
     function hasKernel(): boolean {
       return (
@@ -31,12 +31,11 @@ const extension: JupyterLabPlugin<void> = {
       );
     }
 
-    function hasWidget(): boolean {
+    function hasWidget(path): boolean {
       let check: boolean = false;
       each(app.shell.widgets('main'), widget => {
         if (
-          widget instanceof ModelViewWidget &&
-          widget.id === 'modelview-' + tracker.currentWidget.context.path
+          widget instanceof ModelViewWidget
         ) {
           check = true;
         }
@@ -51,16 +50,16 @@ const extension: JupyterLabPlugin<void> = {
       iconClass: iconClass,
       isEnabled: hasKernel,
       execute: () => {
-        const title: string = tracker.currentWidget.context.path;
+        const title: string = 'Plyto';
         const id: string = 'modelview-' + title;
 
-        if (hasWidget()) {
+        if (hasWidget(tracker.currentWidget.context.path)) {
           app.shell.activateById(id);
         } else {
           let kernel: Kernel.IKernel = tracker.currentWidget.context.session
             .kernel as Kernel.IKernel;
 
-          const widget = new ModelViewWidget(kernel, title);
+          const widget = new ModelViewWidget(kernel, tracker);
           widget.id = id;
           widget.addClass(widgetStyle);
           widget.title.label = title;

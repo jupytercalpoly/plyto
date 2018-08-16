@@ -68,7 +68,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     stepComplete: 0,
     stepNumber: 1,
     commId: '',
-    sending: this.props.hasPanel(),
+    sending: this.props.hasPanel(
+      this.props.tracker.currentWidget.context.path
+    ),
     outgoingComm: null,
     runTime: 0,
     dataSet: new Array<Object>(),
@@ -89,35 +91,34 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
     this.props.kernel.registerCommTarget('plyto', (comm, msg) => {});
 
     this.props.tracker.currentChanged.connect(tracker => {
+      
       /** When current widget changes reset state, connect messaging,
        *  register comm target with the new kernel, and connect statusChanged and
        *  kernelChanged functionality to new */
       let widget: NotebookPanel | null = tracker.currentWidget;
       if (widget && widget.session.kernel) {
-        this.setState(
-          {
-            kernel: widget.session.kernel as Kernel.IKernel
-          },
-          () => {
-            this.state.kernel.anyMessage.connect(this.onMessage, this);
-            this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
+        let kernel = widget.session.kernel as Kernel.IKernel
+        kernel.anyMessage.connect(this.onMessage, this);
+        kernel.registerCommTarget('plyto', (comm, msg) => {});
 
-            if (this.state.sending) {
-              this.setState({
-                outgoingComm: this.state.kernel.connectToComm(
-                  'plyto-data',
-                  'plyto-data'
-                )
-              });
-            }
-          }
-        );
-      }
-
-      if (this.props.tracker.currentWidget) {
+        if (this.props.hasPanel(
+          this.props.tracker.currentWidget.context.path
+        )) {
+          this.setState({
+            sending: true,
+            outgoingComm: this.state.kernel.connectToComm(
+              'plyto-data',
+              'plyto-data'
+            )
+          })
+        }
+        
+        /* * 
+        * Handles kernel interruption and restarts
+        * status item shows 'Training Interrupted' for one second 
+        * */
         this.props.tracker.currentWidget.session.statusChanged.connect(() => {
-          /** Handles kernel interruption,
-           * status item shows 'Training Interrupted' for one second */
+          /** Interruption */
           if (
             this.props.tracker.currentWidget.session.status === 'idle' &&
             this.state.overallComplete < 100 &&
@@ -132,10 +133,90 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               }
             );
           }
-        });
 
-        this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
-          /** Handles kernel restarts */
+          /** Restart */
+          if (this.props.tracker.currentWidget.session.status === 'connected') {
+            let widget: NotebookPanel | null = this.props.tracker.currentWidget;
+            if (widget) {
+              this.setState(
+                {
+                  kernel: widget.session.kernel as Kernel.IKernel
+                },
+                () => {
+                  this.state.kernel.anyMessage.connect(this.onMessage, this);
+                  this.state.kernel.registerCommTarget(
+                    'plyto',
+                    (comm, msg) => {}
+                  );
+  
+                  if (this.state.sending) {
+                    this.setState({
+                      outgoingComm: this.state.kernel.connectToComm(
+                        'plyto-data',
+                        'plyto-data'
+                      )
+                    });
+                  }
+                }
+              );
+              if (this.props.hasPanel(this.props.tracker.currentWidget.context.path)) {
+                this.setState(
+                  {
+                    sending: true,
+                    outgoingComm: this.state.kernel.connectToComm(
+                      'plyto-data',
+                      'plyto-data'
+                    )
+                  }
+                )
+              }
+            }
+          }
+        });
+      }
+    });
+
+    let widget: NotebookPanel | null = this.props.tracker.currentWidget;
+    if (widget && widget.session.kernel) {
+      let kernel = widget.session.kernel as Kernel.IKernel
+      kernel.anyMessage.connect(this.onMessage, this);
+      kernel.registerCommTarget('plyto', (comm, msg) => {});
+
+      if (this.props.hasPanel(this.props.tracker.currentWidget.context.path)) {
+        this.setState(
+          {
+            sending: true,
+            outgoingComm: this.state.kernel.connectToComm(
+              'plyto-data',
+              'plyto-data'
+            )
+          }
+        )
+      }
+      
+      /* * 
+      * Handles kernel interruption and restarts
+      * status item shows 'Training Interrupted' for one second 
+      * */
+      this.props.tracker.currentWidget.session.statusChanged.connect(() => {
+        /** Interruption */
+        if (
+          this.props.tracker.currentWidget.session.status === 'idle' &&
+          this.state.overallComplete < 100 &&
+          this.state.overallComplete > 0
+        ) {
+          this.setState(
+            {
+              overallComplete: -1
+            },
+            () => {
+              this.isFinished();
+            }
+          );
+        }
+
+        /** Restart */
+        if (this.props.tracker.currentWidget.session.status === 'connected') {
           let widget: NotebookPanel | null = this.props.tracker.currentWidget;
           if (widget) {
             this.setState(
@@ -159,59 +240,26 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
                 }
               }
             );
-          }
-        });
-      }
-    });
-
-    if (this.props.tracker.currentWidget) {
-      this.props.tracker.currentWidget.session.statusChanged.connect(() => {
-        /** Handles kernel interruption,
-         * status item shows 'Training Interrupted' for one second */
-        if (
-          this.props.tracker.currentWidget.session.status === 'idle' &&
-          this.state.overallComplete < 100 &&
-          this.state.overallComplete > 0
-        ) {
-          this.setState(
-            {
-              overallComplete: -1
-            },
-            () => this.isFinished()
-          );
-        }
-      });
-
-      this.props.tracker.currentWidget.session.kernelChanged.connect(() => {
-        /** Handles kernel restarts */
-        let widget: NotebookPanel | null = this.props.tracker.currentWidget;
-        if (widget) {
-          this.setState(
-            {
-              kernel: widget.session.kernel as Kernel.IKernel
-            },
-            () => {
-              this.state.kernel.anyMessage.connect(this.onMessage, this);
-              this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
-
-              if (this.state.sending) {
-                this.setState({
+            if (this.props.hasPanel(this.props.tracker.currentWidget.context.path)) {
+              this.setState(
+                {
+                  sending: true,
                   outgoingComm: this.state.kernel.connectToComm(
                     'plyto-data',
                     'plyto-data'
                   )
-                });
-              }
+                }
+              )
             }
-          );
+          }
         }
-      });
+
+      })
     }
   }
 
   async onMessage(sender: Kernel.IKernel, msg: any) {
     msg = msg.msg;
-
     /** On comm_open message save comm_id */
     if (
       msg.channel === 'iopub' &&
@@ -219,7 +267,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       msg.header.msg_type === 'comm_open'
     ) {
       await this.setState({
-        commId: msg.content.comm_id.toString()
+        commId: msg.content.comm_id.toString(),
+        sending: this.props.hasPanel(this.props.tracker.currentWidget.context.path)
       });
 
       /** on comm_msg for plyto comm, update state for status item and model viewer */
@@ -231,6 +280,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       /** update data for status item */
       await this.setState(
         {
+          sending: this.props.hasPanel(this.props.tracker.currentWidget.context.path),
           overallComplete: Number(
             parseFloat(msg.content.data['totalProgress'].toString()).toFixed(2)
           ),
@@ -276,7 +326,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           updateGraph:
             (prevState.currentStep !== msg.content.data['currentStep'] &&
               msg.content.data['currentStep'] !== 0) ||
-            this.state.done,
+            msg.content.data['totalProgress'] === 100,
           displayGraph: true,
           dataSet: [...prevState.dataSet, msg.content.data['dataSet']],
           done: msg.content.data['totalProgress'] === 100,
@@ -294,7 +344,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           currentStep: this.state.currentStep,
           updateGraph: this.state.updateGraph,
           displayGraph: true,
-          done: this.state.done
+          done: this.state.done,
+          title: this.props.tracker.currentWidget.context.path
         });
       }
 
@@ -322,7 +373,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               currentStep: this.state.currentStep,
               updateGraph: false,
               displayGraph: false,
-              done: this.state.done
+              done: this.state.done,
+              title: this.props.tracker.currentWidget.context.path
             });
           }
         }
@@ -343,8 +395,11 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         });
       }, 2000);
 
-      this.state.kernel.connectToComm('plyto',this.state.commId).close()
+      this.state.kernel.connectToComm('plyto').close()
+      this.state.kernel.connectToComm('plyto').dispose()
       this.state.kernel.connectToComm('plyto-data').close()
+      this.state.kernel.connectToComm('plyto-data').dispose()
+
     }
   }
 

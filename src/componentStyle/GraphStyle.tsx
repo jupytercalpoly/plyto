@@ -11,7 +11,7 @@ export function statsContainerStyle(done) {
     return style({
       width: '100%',
       display: 'block',
-      margin: '15px 0px 17px 0px'
+      margin: '15px 0px 2px 0px'
     });
   }
 }

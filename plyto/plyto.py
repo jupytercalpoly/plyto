@@ -33,6 +33,8 @@ class PlytoAPI:
         self.comm = Comm('plyto')
         self.comm_manager.register_comm(self.comm)
 
+        print(self.comm_manager.comms)
+
     def update_current_progress(self, new_progress):
         """
         Update the progress of iterating through the current step and send data to frontend
@@ -108,8 +110,8 @@ class PlytoAPI:
 
         self.comm.send(data=data)
         
-        if data['totalProgress'] == 100:
-            self.comm.close()
+        # if data['totalProgress'] == 100:
+        #     self.comm.close()
 
         # TODO: close comm on an interrupted kernel
 
