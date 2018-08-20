@@ -61,28 +61,44 @@ class ModelViewPanel extends React.Component<
 
     if (this.props.tracker.currentWidget && this.state.kernel) {
       /** Connect to custom comm with the backend package */
-      this.state.kernel.anyMessage.connect(this.onMessage, this);
+      this.state.kernel.anyMessage.connect(
+        this.onMessage,
+        this
+      );
     }
 
     this.props.tracker.currentChanged.connect(tracker => {
       if (tracker.currentWidget && tracker.currentWidget.session.kernel) {
-        this.setState({
-          kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
-        }, () => {
-          this.state.kernel.anyMessage.connect(this.onMessage, this);
-        })
+        this.setState(
+          {
+            kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
+          },
+          () => {
+            this.state.kernel.anyMessage.connect(
+              this.onMessage,
+              this
+            );
+          }
+        );
       } else if (tracker.currentWidget) {
         tracker.currentWidget.session.statusChanged.connect(session => {
           if (session.status === 'connected') {
-            this.setState({
-              kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
-            }, () => {
-              this.state.kernel.anyMessage.connect(this.onMessage, this);
-            })
+            this.setState(
+              {
+                kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
+              },
+              () => {
+                this.state.kernel.anyMessage.connect(
+                  this.onMessage,
+                  this
+                );
+              }
+            );
           }
-        })
+        });
       }
-    })
+    });
+  }
 
   componentWillMount() {
     this.setState({
@@ -117,28 +133,29 @@ class ModelViewPanel extends React.Component<
       msg.content.comm_id === 'plyto-data' &&
       !msg.content.data['open']
     ) {
-      if (msg.content.data['title'] !== 'none') {
+      let data = JSON.parse(msg.content.data)
+      if (data['title'] !== 'none') {
         this.setState({
-          runTime: msg.content.data['runTime'],
-          dataSet: msg.content.data['dataSet'],
-          spec: msg.content.data['spec'],
-          dataItem: msg.content.data['dataItem'],
-          currentStep: msg.content.data['currentStep'],
-          updateGraph: msg.content.data['updateGraph'],
-          displayGraph: msg.content.data['displayGraph'],
-          done: msg.content.data['done'],
-          title: msg.content.data['title']
+          runTime: data['runTime'],
+          dataSet: data['dataSet'],
+          spec: data['spec'],
+          dataItem: data['dataItem'],
+          currentStep: data['currentStep'],
+          updateGraph: data['updateGraph'],
+          displayGraph: data['displayGraph'],
+          done: data['done'],
+          title: data['title']
         });
       } else {
         this.setState({
-          runTime: msg.content.data['runTime'],
-          dataSet: msg.content.data['dataSet'],
-          spec: msg.content.data['spec'],
-          dataItem: msg.content.data['dataItem'],
-          currentStep: msg.content.data['currentStep'],
-          updateGraph: msg.content.data['updateGraph'],
-          displayGraph: msg.content.data['displayGraph'],
-          done: msg.content.data['done']
+          runTime: data['runTime'],
+          dataSet: data['dataSet'],
+          spec: data['spec'],
+          dataItem: data['dataItem'],
+          currentStep: data['currentStep'],
+          updateGraph: data['updateGraph'],
+          displayGraph: data['displayGraph'],
+          done: data['done']
         });
       }
     }

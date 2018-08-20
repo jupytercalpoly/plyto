@@ -13,9 +13,7 @@ export class StatusItemWidget extends ReactElementWidget {
   ) {
     super(
       <StatusItem
-        kernel={
-          tracker.currentWidget.context.session.kernel as Kernel.IKernel
-        }
+        kernel={tracker.currentWidget.context.session.kernel as Kernel.IKernel}
         commands={commands}
         tracker={tracker}
         hasPanel={hasPanel}
@@ -79,7 +77,10 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       done: false
     };
     /** Connect to custom comm with the backend package */
-    this.state.kernel.anyMessage.connect(this.onMessage, this);
+    this.state.kernel.anyMessage.connect(
+      this.onMessage,
+      this
+    );
 
     /** Register a custom comm with the backend package */
     this.state.kernel.registerCommTarget('plyto', (comm, msg) => {});
@@ -98,91 +99,101 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       if (widget && !widget.session.kernel) {
         tracker.currentWidget.session.statusChanged.connect(session => {
           if (session.status === 'connected') {
-            let kernel = widget.session.kernel as Kernel.IKernel
-            kernel.anyMessage.connect(this.onMessage, this);
+            let kernel = widget.session.kernel as Kernel.IKernel;
+            kernel.anyMessage.connect(
+              this.onMessage,
+              this
+            );
             kernel.registerCommTarget('plyto', (comm, msg) => {});
 
             this.setState({
               kernel: kernel
-            })
+            });
             if (this.props.hasPanel()) {
               this.setState({
                 sending: true,
-                outgoingComm: kernel.connectToComm(
-                  'plyto-data',
-                  'plyto-data'
-                )
-              })
+                outgoingComm: kernel.connectToComm('plyto-data', 'plyto-data')
+              });
             }
-            
-            /* * 
-            * Handles kernel interruption and restarts
-            * status item shows 'Training Interrupted' for one second 
-            * */
-            this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
-              /** Interruption */
-              if (
-                this.props.tracker.currentWidget.session.status === 'idle' &&
-                this.state.overallComplete < 100 &&
-                this.state.overallComplete > 0
-              ) {
-                this.setState(
-                  {
-                    overallComplete: -1
-                  },
-                  () => {
-                    this.isFinished();
-                  }
-                );
-              }
 
-              /** Restart */
-              if (this.props.tracker.currentWidget.session.status === 'restarting') {
-                this.setState({
-                  overallComplete:0
-                }) 
-                let widget: NotebookPanel | null = this.props.tracker.currentWidget;
-                if (widget) {
+            /**
+             * Handles kernel interruption and restarts
+             * status item shows 'Training Interrupted' for one second
+             * */
+            this.props.tracker.currentWidget.session.statusChanged.connect(
+              session => {
+                /** Interruption */
+                if (
+                  this.props.tracker.currentWidget.session.status === 'idle' &&
+                  this.state.overallComplete < 100 &&
+                  this.state.overallComplete > 0
+                ) {
                   this.setState(
                     {
-                      kernel: widget.session.kernel as Kernel.IKernel
+                      overallComplete: -1
                     },
                     () => {
-                      this.state.kernel.anyMessage.connect(this.onMessage, this);
-                      this.state.kernel.registerCommTarget(
-                        'plyto',
-                        (comm, msg) => {}
-                      );
-      
-                      if (this.state.sending) {
-                        this.setState({
-                          outgoingComm: this.state.kernel.connectToComm(
-                            'plyto-data',
-                            'plyto-data'
-                          )
-                        });
-                      }
+                      this.isFinished();
                     }
                   );
-                  if (this.props.hasPanel()) {
+                }
+
+                /** Restart */
+                if (
+                  this.props.tracker.currentWidget.session.status ===
+                  'restarting'
+                ) {
+                  this.setState({
+                    overallComplete: 0
+                  });
+                  let widget: NotebookPanel | null = this.props.tracker
+                    .currentWidget;
+                  if (widget) {
                     this.setState(
                       {
+                        kernel: widget.session.kernel as Kernel.IKernel
+                      },
+                      () => {
+                        this.state.kernel.anyMessage.connect(
+                          this.onMessage,
+                          this
+                        );
+                        this.state.kernel.registerCommTarget(
+                          'plyto',
+                          (comm, msg) => {}
+                        );
+
+                        if (this.state.sending) {
+                          this.setState({
+                            outgoingComm: this.state.kernel.connectToComm(
+                              'plyto-data',
+                              'plyto-data'
+                            )
+                          });
+                        }
+                      }
+                    );
+                    if (this.props.hasPanel()) {
+                      this.setState({
                         sending: true,
                         outgoingComm: this.state.kernel.connectToComm(
                           'plyto-data',
                           'plyto-data'
                         )
-                      }
-                    )
+                      });
+                    }
                   }
                 }
               }
-            });
+            );
           }
         });
       } else if (widget && widget.session.kernel) {
-        let kernel = widget.session.kernel as Kernel.IKernel
-        kernel.anyMessage.connect(this.onMessage, this);
+        let kernel = widget.session.kernel as Kernel.IKernel;
+        kernel.anyMessage.connect(
+          this.onMessage,
+          this
+        );
         kernel.registerCommTarget('plyto', (comm, msg) => {});
 
         this.setState({
@@ -195,11 +206,103 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           });
         }
 
-        /* * 
-        * Handles kernel interruption and restarts
-        * status item shows 'Training Interrupted' for one second 
-        * */
-        this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
+        /**
+         * Handles kernel interruption and restarts
+         * status item shows 'Training Interrupted' for one second
+         * */
+        this.props.tracker.currentWidget.session.statusChanged.connect(
+          session => {
+            /** Interruption */
+            if (
+              this.props.tracker.currentWidget.session.status === 'idle' &&
+              this.state.overallComplete < 100 &&
+              this.state.overallComplete > 0
+            ) {
+              this.setState(
+                {
+                  overallComplete: -1
+                },
+                () => {
+                  this.isFinished();
+                }
+              );
+            }
+
+            /** Restart */
+            if (
+              this.props.tracker.currentWidget.session.status === 'restarting'
+            ) {
+              this.setState({
+                overallComplete: 0
+              });
+              let widget: NotebookPanel | null = this.props.tracker
+                .currentWidget;
+              if (widget) {
+                this.setState(
+                  {
+                    kernel: widget.session.kernel as Kernel.IKernel
+                  },
+                  () => {
+                    this.state.kernel.anyMessage.connect(
+                      this.onMessage,
+                      this
+                    );
+                    this.state.kernel.registerCommTarget(
+                      'plyto',
+                      (comm, msg) => {}
+                    );
+
+                    if (this.state.sending) {
+                      this.setState({
+                        outgoingComm: this.state.kernel.connectToComm(
+                          'plyto-data',
+                          'plyto-data'
+                        )
+                      });
+                    }
+                  }
+                );
+                if (this.props.hasPanel()) {
+                  this.setState({
+                    sending: true,
+                    outgoingComm: this.state.kernel.connectToComm(
+                      'plyto-data',
+                      'plyto-data'
+                    )
+                  });
+                }
+              }
+            }
+          }
+        );
+      }
+    });
+
+    let widget: NotebookPanel | null = this.props.tracker.currentWidget;
+    if (widget && widget.session.kernel) {
+      let kernel = widget.session.kernel as Kernel.IKernel;
+      kernel.anyMessage.connect(
+        this.onMessage,
+        this
+      );
+      kernel.registerCommTarget('plyto', (comm, msg) => {});
+
+      if (this.props.hasPanel()) {
+        this.setState({
+          sending: true,
+          outgoingComm: this.state.kernel.connectToComm(
+            'plyto-data',
+            'plyto-data'
+          )
+        });
+      }
+
+      /**
+       * Handles kernel interruption and restarts
+       * status item shows 'Training Interrupted' for one second
+       * */
+      this.props.tracker.currentWidget.session.statusChanged.connect(
+        session => {
           /** Interruption */
           if (
             this.props.tracker.currentWidget.session.status === 'idle' &&
@@ -217,10 +320,12 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           }
 
           /** Restart */
-          if (this.props.tracker.currentWidget.session.status === 'restarting') {
+          if (
+            this.props.tracker.currentWidget.session.status === 'restarting'
+          ) {
             this.setState({
-              overallComplete:0
-            }) 
+              overallComplete: 0
+            });
             let widget: NotebookPanel | null = this.props.tracker.currentWidget;
             if (widget) {
               this.setState(
@@ -228,7 +333,10 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
                   kernel: widget.session.kernel as Kernel.IKernel
                 },
                 () => {
-                  this.state.kernel.anyMessage.connect(this.onMessage, this);
+                  this.state.kernel.anyMessage.connect(
+                    this.onMessage,
+                    this
+                  );
                   this.state.kernel.registerCommTarget(
                     'plyto',
                     (comm, msg) => {}
@@ -255,87 +363,8 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               }
             }
           }
-        });
-      }
-    });
-
-    let widget: NotebookPanel | null = this.props.tracker.currentWidget;
-    if (widget && widget.session.kernel) {
-      let kernel = widget.session.kernel as Kernel.IKernel;
-      kernel.anyMessage.connect(this.onMessage, this);
-      kernel.registerCommTarget('plyto', (comm, msg) => {});
-
-      if (this.props.hasPanel()) {
-        this.setState({
-          sending: true,
-          outgoingComm: this.state.kernel.connectToComm(
-            'plyto-data',
-            'plyto-data'
-          )
-        });
-      }
-
-      /* * 
-      * Handles kernel interruption and restarts
-      * status item shows 'Training Interrupted' for one second 
-      * */
-      this.props.tracker.currentWidget.session.statusChanged.connect((session) => {
-        /** Interruption */
-        if (
-          this.props.tracker.currentWidget.session.status === 'idle' &&
-          this.state.overallComplete < 100 &&
-          this.state.overallComplete > 0
-        ) {
-          this.setState(
-            {
-              overallComplete: -1
-            },
-            () => {
-              this.isFinished();
-            }
-          );
         }
-
-        /** Restart */
-        if (this.props.tracker.currentWidget.session.status === 'restarting') {
-          this.setState({
-            overallComplete:0
-          }) 
-          let widget: NotebookPanel | null = this.props.tracker.currentWidget;
-          if (widget) {
-            this.setState(
-              {
-                kernel: widget.session.kernel as Kernel.IKernel
-              },
-              () => {
-                this.state.kernel.anyMessage.connect(this.onMessage, this);
-                this.state.kernel.registerCommTarget(
-                  'plyto',
-                  (comm, msg) => {}
-                );
-
-                if (this.state.sending) {
-                  this.setState({
-                    outgoingComm: this.state.kernel.connectToComm(
-                      'plyto-data',
-                      'plyto-data'
-                    )
-                  });
-                }
-              }
-            );
-            if (this.props.hasPanel()) {
-              this.setState({
-                sending: true,
-                outgoingComm: this.state.kernel.connectToComm(
-                  'plyto-data',
-                  'plyto-data'
-                )
-              });
-            }
-          }
-        }
-      });
+      );
     }
   }
 
@@ -361,7 +390,9 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       msg.channel === 'iopub' &&
       msg.header.msg_type === 'comm_msg' &&
       msg.content.comm_id ===
-        this.state.commIds[Number(this.props.tracker.currentWidget.context.path)]
+        this.state.commIds[
+          Number(this.props.tracker.currentWidget.context.path)
+        ]
     ) {
       /** update data for status item */
       await this.setState(
@@ -422,19 +453,21 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
       /** if panel is open, send data across plyto-data comm */
       if (this.state.sending) {
-        this.state.outgoingComm.send(JSON.stringify({
-          runTime: this.state.runTime,
-          dataSet: this.state.dataSet,
-          dataItem: this.state.dataItem,
-          spec: this.state.spec,
-          currentStep: this.state.currentStep,
-          updateGraph: this.state.updateGraph,
-          displayGraph: true,
-          done: this.state.done,
-          title: this.state.sending
-            ? this.props.tracker.currentWidget.context.path
-            : 'none'
-        }));
+        this.state.outgoingComm.send(
+          JSON.stringify({
+            runTime: this.state.runTime,
+            dataSet: this.state.dataSet,
+            dataItem: this.state.dataItem,
+            spec: this.state.spec,
+            currentStep: this.state.currentStep,
+            updateGraph: this.state.updateGraph,
+            displayGraph: true,
+            done: this.state.done,
+            title: this.state.sending
+              ? this.props.tracker.currentWidget.context.path
+              : 'none'
+          })
+        );
       }
 
       /** when panel is opened, recieve plyto-data message and update sending and outgoingComm */
@@ -453,19 +486,21 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         },
         () => {
           if (this.state.dataSet.length > 0) {
-            this.state.outgoingComm.send(JSON.stringify({
-              runTime: this.state.runTime,
-              dataSet: this.state.dataSet,
-              dataItem: this.state.dataItem,
-              spec: this.state.spec,
-              currentStep: this.state.currentStep,
-              updateGraph: false,
-              displayGraph: false,
-              done: this.state.done,
-              title: this.state.sending
-                ? this.props.tracker.currentWidget.context.path
-                : 'none'
-            }));
+            this.state.outgoingComm.send(
+              JSON.stringify({
+                runTime: this.state.runTime,
+                dataSet: this.state.dataSet,
+                dataItem: this.state.dataItem,
+                spec: this.state.spec,
+                currentStep: this.state.currentStep,
+                updateGraph: false,
+                displayGraph: false,
+                done: this.state.done,
+                title: this.state.sending
+                  ? this.props.tracker.currentWidget.context.path
+                  : 'none'
+              })
+            );
           }
         }
       );

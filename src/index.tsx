@@ -80,7 +80,7 @@ const extension: JupyterLabPlugin<void> = {
       let widget: NotebookPanel | null = tracker.currentWidget;
       if (widget) {
         let button: ToolbarButton = new ToolbarButton({
-          iconClassName: iconClass,
+          iconClassName: `${iconClass} jp-Icon jp-Icon-16 jp-ToolbarButtonComponent-icon`,
           onClick: () => {
             app.commands.execute(command);
           },

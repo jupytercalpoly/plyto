@@ -15,8 +15,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     install_requires=[
-        'notebook', 
-        'psutil'
+        'ipykernel', 
+        'IPython'
     ],
     package_data={'plyto': ['*']},
 )
