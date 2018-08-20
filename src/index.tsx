@@ -1,5 +1,5 @@
 import { JupyterLab, JupyterLabPlugin } from '@jupyterlab/application';
-import { ICommandPalette, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+import { ICommandPalette, ToolbarButton } from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Kernel } from '@jupyterlab/services';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -14,7 +14,7 @@ import '../style/urls.css';
  * with JupyterLab
  **/
 const extension: JupyterLabPlugin<void> = {
-  id: '@jupyterlab/jupyterlab-machinelearning',
+  id: 'plyto',
   requires: [ICommandPalette, INotebookTracker, IStatusBar],
   activate: (
     app: JupyterLab,
@@ -39,11 +39,10 @@ const extension: JupyterLabPlugin<void> = {
       return check;
     }
 
-
     /** Add command to command registry */
     const command: string = 'machinelearning:open-new';
     app.commands.addCommand(command, {
-      label: 'Open Machine Learning View',
+      label: 'Open Plyto View',
       iconClass: iconClass,
       isEnabled: hasKernel,
       execute: () => {
@@ -80,10 +79,13 @@ const extension: JupyterLabPlugin<void> = {
     function addButton() {
       let widget: NotebookPanel | null = tracker.currentWidget;
       if (widget) {
-        let button: ToolbarButton = Toolbar.createFromCommand(
-          app.commands,
-          command
-        );
+        let button: ToolbarButton = new ToolbarButton({
+          iconClassName: `${iconClass} jp-Icon jp-Icon-16 jp-ToolbarButtonComponent-icon`,
+          onClick: () => {
+            app.commands.execute(command);
+          },
+          tooltip: 'Open Plyto View'
+        });
         widget.toolbar.insertItem(9, app.commands.label(command), button);
       }
     }

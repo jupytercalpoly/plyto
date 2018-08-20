@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { ModelViewer } from './components/ModelViewer';
 import { ReactElementWidget } from '@jupyterlab/apputils';
-import { Kernel, /*KernelMessage*/ } from '@jupyterlab/services';
+import { Kernel /*KernelMessage*/ } from '@jupyterlab/services';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import VegaEmbed from 'vega-embed';
 
 /** Top Level: ReactElementWidget that passes the kernel down to a React Component */
 export class ModelViewWidget extends ReactElementWidget {
   constructor(kernel: Kernel.IKernel, tracker: INotebookTracker) {
-    super(<ModelViewPanel kernel={kernel} tracker={tracker}/>);
+    super(<ModelViewPanel kernel={kernel} tracker={tracker} />);
   }
 }
 
@@ -25,16 +25,16 @@ interface ModelViewPanelProps {
  */
 interface ModelViewPanelState {
   runTime: number;
-  dataSet: Object[];
+  dataSet: { [index: string]: any }[];
   dataItem: { [index: string]: number };
-  spec: Object[];
+  spec: { [index: string]: any }[];
   currentStep: number;
   updateGraph: boolean;
   displayGraph: boolean;
   done: boolean;
   didRender: boolean;
   title: string;
-  kernel: Kernel.IKernel
+  kernel: Kernel.IKernel;
 }
 
 /** Second Level: React Component that stores the state for the entire extension */
@@ -44,8 +44,8 @@ class ModelViewPanel extends React.Component<
 > {
   state = {
     runTime: 0,
-    dataSet: new Array<Object>(),
-    spec: new Array<Object>(),
+    dataSet: new Array<{ [index: string]: any }>(),
+    spec: new Array<{ [index: string]: any }>(),
     dataItem: {},
     currentStep: 0,
     updateGraph: true,
@@ -53,83 +53,110 @@ class ModelViewPanel extends React.Component<
     done: false,
     didRender: false,
     title: '',
-    kernel: this.props.kernel,
+    kernel: this.props.kernel
   };
 
   constructor(props: any) {
     super(props);
-    
+
     if (this.props.tracker.currentWidget && this.state.kernel) {
       /** Connect to custom comm with the backend package */
-      this.state.kernel.anyMessage.connect(this.onMessage, this);
+      this.state.kernel.anyMessage.connect(
+        this.onMessage,
+        this
+      );
     }
 
     this.props.tracker.currentChanged.connect(tracker => {
       if (tracker.currentWidget && tracker.currentWidget.session.kernel) {
-        this.setState({
-          kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
-        }, () => {
-          this.state.kernel.anyMessage.connect(this.onMessage, this);
-        })
+        this.setState(
+          {
+            kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
+          },
+          () => {
+            this.state.kernel.anyMessage.connect(
+              this.onMessage,
+              this
+            );
+          }
+        );
+      } else if (tracker.currentWidget) {
+        tracker.currentWidget.session.statusChanged.connect(session => {
+          if (session.status === 'connected') {
+            this.setState(
+              {
+                kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
+              },
+              () => {
+                this.state.kernel.anyMessage.connect(
+                  this.onMessage,
+                  this
+                );
+              }
+            );
+          }
+        });
       }
-    })
+    });
   }
 
   componentWillMount() {
     this.setState({
       didRender: false,
       spec: []
-    })
+    });
   }
 
   componentDidMount() {
     let comm: Kernel.IComm = this.state.kernel.connectToComm(
-      'plyto-data', 
+      'plyto-data',
       'plyto-data'
-    )
-    comm.send({open: true})
+    );
+    comm.send({ open: true });
     this.setState({
       didRender: false
-    })
+    });
   }
-  
+
   componentDidUpdate() {
     if (!this.state.didRender && this.state.spec.length !== 0) {
       this.setState({
         didRender: true
-      })
+      });
     }
   }
 
   onMessage(sender: Kernel.IKernel, msg: any) {
-    msg = msg.msg
-    if (msg.channel === 'shell' 
-      && msg.content.comm_id === 'plyto-data'
-      && !msg.content.data['open']
+    msg = msg.msg;
+    if (
+      msg.channel === 'shell' &&
+      msg.content.comm_id === 'plyto-data' &&
+      !msg.content.data['open']
     ) {
-      if (msg.content.data['title'] !== 'none'){
+      let data = JSON.parse(msg.content.data)
+      if (data['title'] !== 'none') {
         this.setState({
-          runTime: msg.content.data['runTime'],
-          dataSet: msg.content.data['dataSet'],
-          spec: msg.content.data['spec'],
-          dataItem: msg.content.data['dataItem'],
-          currentStep: msg.content.data['currentStep'],
-          updateGraph: msg.content.data['updateGraph'],
-          displayGraph: msg.content.data['displayGraph'],
-          done: msg.content.data['done'],
-          title: msg.content.data['title']
-        })
+          runTime: data['runTime'],
+          dataSet: data['dataSet'],
+          spec: data['spec'],
+          dataItem: data['dataItem'],
+          currentStep: data['currentStep'],
+          updateGraph: data['updateGraph'],
+          displayGraph: data['displayGraph'],
+          done: data['done'],
+          title: data['title']
+        });
       } else {
         this.setState({
-          runTime: msg.content.data['runTime'],
-          dataSet: msg.content.data['dataSet'],
-          spec: msg.content.data['spec'],
-          dataItem: msg.content.data['dataItem'],
-          currentStep: msg.content.data['currentStep'],
-          updateGraph: msg.content.data['updateGraph'],
-          displayGraph: msg.content.data['displayGraph'],
-          done: msg.content.data['done']
-        })
+          runTime: data['runTime'],
+          dataSet: data['dataSet'],
+          spec: data['spec'],
+          dataItem: data['dataItem'],
+          currentStep: data['currentStep'],
+          updateGraph: data['updateGraph'],
+          displayGraph: data['displayGraph'],
+          done: data['done']
+        });
       }
     }
   }
@@ -152,7 +179,11 @@ class ModelViewPanel extends React.Component<
       }
     };
 
-    if (this.state.didRender && this.state.updateGraph && this.state.spec.length !== 0) {
+    if (
+      this.state.didRender &&
+      this.state.updateGraph &&
+      this.state.spec.length !== 0
+    ) {
       this.state.spec.forEach(spec => {
         VegaEmbed('#' + spec['name'], spec, options).then(res => {
           res.view.insert('dataSet', this.state.dataSet).run();
@@ -169,6 +200,6 @@ class ModelViewPanel extends React.Component<
         displayGraph={this.state.displayGraph}
         title={this.state.title}
       />
-    ); 
+    );
   }
 }

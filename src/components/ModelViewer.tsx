@@ -13,7 +13,7 @@ import {
 import { statsContainerStyle, graphStyle } from '../componentStyle/graphStyle';
 
 export interface IModelViewerProps {
-  spec: Object[];
+  spec: { [index: string]: any }[];
   dataItem: { [index: string]: any };
   done: boolean;
   runTime: string;
@@ -30,8 +30,8 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
     return (
       <div className={modelViewerStyle}>
         <div className="before" />
-        <div className={textStyle} id='title'>
-          {this.props.title}
+        <div className={textStyle} id="title">
+          {this.props.title.split('/')[this.props.title.split('/').length - 1]}
         </div>
         <div className={statsContainerStyle(this.props.done)}>
           {Object.keys(this.props.dataItem).length === 0 && (
@@ -57,12 +57,12 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
             </div>
           )}
         </div>
-        {!this.props.done &&
-          <div className={textStyle} id='message'>
+        {!this.props.done && (
+          <div className={textStyle} id="message">
             {'Graphs will update at the end of each epoch'}
           </div>
-        }
-        {this.props.spec !== [] &&
+        )}
+        {this.props.spec.length !== 0 &&
           this.props.displayGraph && (
             <div className={graphsStyle}>
               {this.props.spec.map(spec => {
