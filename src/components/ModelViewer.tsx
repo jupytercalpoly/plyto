@@ -31,7 +31,7 @@ export class ModelViewer extends React.Component<IModelViewerProps, {}> {
       <div className={modelViewerStyle}>
         <div className="before" />
         <div className={textStyle} id="title">
-          {this.props.title}
+          {this.props.title.split('/')[this.props.title.split('/').length - 1]}
         </div>
         <div className={statsContainerStyle(this.props.done)}>
           {Object.keys(this.props.dataItem).length === 0 && (

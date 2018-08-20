@@ -44,12 +44,7 @@ interface IStatusItemState {
   stepNumber: number;
   commIds: { [index: number]: any }[];
   sending: boolean;
-<<<<<<< Updated upstream
   outgoingComm: Kernel.IComm;
-=======
-  sendingFrom: string;
-  outgoingComm: any;
->>>>>>> Stashed changes
   runTime: number;
   dataSet: Object[];
   dataItem: { [index: string]: any };
@@ -62,29 +57,6 @@ interface IStatusItemState {
 
 /** Second Level: React Component that stores the state for the entire extension */
 class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
-<<<<<<< Updated upstream
-  state = {
-    kernel: this.props.kernel,
-    overallComplete: 0,
-    stepComplete: 0,
-    stepNumber: 1,
-    commIds: {},
-    sending: this.props.hasPanel(
-      this.props.tracker.currentWidget.context.path
-    ),
-    outgoingComm: null,
-    runTime: 0,
-    dataSet: new Array<Object>(),
-    spec: new Array<Object>(),
-    dataItem: {},
-    currentStep: 0,
-    updateGraph: true,
-    displayGraph: true,
-    done: false
-  };
-
-=======
->>>>>>> Stashed changes
   constructor(props: any) {
     super(props);
     this.state = {
@@ -96,7 +68,6 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
       sending: this.props.hasPanel(
         this.props.tracker.currentWidget.context.path
       ),
-      sendingFrom: '',
       outgoingComm: null,
       runTime: 0,
       dataSet: new Array<{ [index: string]: any }>(),
@@ -451,7 +422,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
 
       /** if panel is open, send data across plyto-data comm */
       if (this.state.sending) {
-        this.state.outgoingComm.send({
+        this.state.outgoingComm.send(JSON.stringify({
           runTime: this.state.runTime,
           dataSet: this.state.dataSet,
           dataItem: this.state.dataItem,
@@ -463,7 +434,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
           title: this.state.sending
             ? this.props.tracker.currentWidget.context.path
             : 'none'
-        });
+        }));
       }
 
       /** when panel is opened, recieve plyto-data message and update sending and outgoingComm */
@@ -482,7 +453,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
         },
         () => {
           if (this.state.dataSet.length > 0) {
-            this.state.outgoingComm.send({
+            this.state.outgoingComm.send(JSON.stringify({
               runTime: this.state.runTime,
               dataSet: this.state.dataSet,
               dataItem: this.state.dataItem,
@@ -494,7 +465,7 @@ class StatusItem extends React.Component<IStatusItemProps, IStatusItemState> {
               title: this.state.sending
                 ? this.props.tracker.currentWidget.context.path
                 : 'none'
-            });
+            }));
           }
         }
       );

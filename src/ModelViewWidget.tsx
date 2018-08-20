@@ -66,17 +66,23 @@ class ModelViewPanel extends React.Component<
 
     this.props.tracker.currentChanged.connect(tracker => {
       if (tracker.currentWidget && tracker.currentWidget.session.kernel) {
-        this.setState(
-          {
-            kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
-          },
-          () => {
-            this.state.kernel.anyMessage.connect(this.onMessage, this);
+        this.setState({
+          kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
+        }, () => {
+          this.state.kernel.anyMessage.connect(this.onMessage, this);
+        })
+      } else if (tracker.currentWidget) {
+        tracker.currentWidget.session.statusChanged.connect(session => {
+          if (session.status === 'connected') {
+            this.setState({
+              kernel: tracker.currentWidget.session.kernel as Kernel.IKernel
+            }, () => {
+              this.state.kernel.anyMessage.connect(this.onMessage, this);
+            })
           }
-        );
+        })
       }
-    });
-  }
+    })
 
   componentWillMount() {
     this.setState({
