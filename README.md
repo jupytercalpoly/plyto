@@ -1,5 +1,4 @@
 # plyto
-[![Binder](http://beta.mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupytercalpoly/plyto/master)
 
 Python Visualization Toolkit for Machine Learning and Data Exploration
 
