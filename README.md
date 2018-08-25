@@ -15,13 +15,18 @@ Python Visualization Toolkit for Machine Learning and Data Exploration
 
 ## Usage
 
-- Open model visualizations from the toolbar or status bar (if model is training)
+- Go through the [example notebooks](https://github.com/jupytercalpoly/plyto/tree/master/notebooks)
 - Use data exploration functions with 
 ```python
 from plyto import check_data, check_column
 ```
 
 ## Install
+
+```python
+pip install plyto
+jupyter labextension install jupyterlab-plyto
+```
 
 ## Development
 
