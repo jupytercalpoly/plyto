@@ -1,0 +1,7 @@
+ipykernel
+IPython
+plyto
+keras
+torch
+torchvision
+pandas

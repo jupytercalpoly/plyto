@@ -1,0 +1,11 @@
+#!/bin/bash
+
+jupyter labextension install jupyterlab-plyto
+
+pip install ipykernel
+pip install IPython
+pip install plyto
+pip install keras
+pip install torch
+pip install torchvision
+pip install panda
