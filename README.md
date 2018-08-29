@@ -1,5 +1,7 @@
 # plyto
 
+[![Binder](https://beta.mybinder.org/badge.svg)](https://mybinder.org/v2/gh/jupytercalpoly/plyto/master?urlpath=lab)
+
 Python Visualization Toolkit for Machine Learning and Data Exploration
 
 ## Prerequisites for Model Visualization
