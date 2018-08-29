@@ -6,6 +6,7 @@ pip install ipykernel
 pip install IPython
 pip install plyto
 pip install keras
+pip install tensorflow
 pip install torch
 pip install torchvision
 pip install panda
