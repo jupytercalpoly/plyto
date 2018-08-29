@@ -1,6 +1,7 @@
 #!/bin/bash
 
 jupyter labextension install jupyterlab-plyto
+jupyter labextension install @jupyterlab/statusbar
 
 pip install ipykernel
 pip install IPython
